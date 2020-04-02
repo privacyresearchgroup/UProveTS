@@ -53,12 +53,12 @@ export interface SerializedUProveToken extends SerializedBaseToken {
 export interface UProveToken {
     uidp: Uint8Array
     h: GroupElement
-    ti?: Uint8Array
-    pi?: Uint8Array
+    ti?: Uint8Array | null
+    pi?: Uint8Array | null
     szp: GroupElement
     scp: ZqElement
     srp: ZqElement
-    d: false
+    d: boolean
 }
 
 export interface SerializedBaseKeyAndToken {
