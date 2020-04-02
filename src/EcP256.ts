@@ -1,4 +1,4 @@
-﻿//*********************************************************
+﻿// *********************************************************
 //
 //    Copyright (c) Microsoft. All rights reserved.
 //
@@ -14,7 +14,7 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 //
-//*********************************************************
+// *********************************************************
 
 // U-Prove ECP256 Recommended Parameters.
 // See http://www.microsoft.com/uprove for details.
