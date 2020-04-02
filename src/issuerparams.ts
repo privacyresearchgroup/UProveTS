@@ -106,7 +106,7 @@ export class IssuerParams implements IssuerParamsData, IssuerParamsFunctions {
             const token = {
                 uidp: base64ToUint8Array(ukatObj.token.uidp),
                 h: Gq.createElementFromBytes(base64ToUint8Array(ukatObj.token.h)),
-                ti: ukatObj.token.ti ? base64ToUint8Array(ukatObj.token.ti) : null,
+                ti: ukatObj.token.ti ? base64ToUint8Array(ukatObj.token.ti) : null, // TODO: can we make these undefined?
                 pi: ukatObj.token.pi ? base64ToUint8Array(ukatObj.token.pi) : null,
                 szp: Gq.createElementFromBytes(base64ToUint8Array(ukatObj.token.szp)),
                 scp: Zq.createElementFromBytes(base64ToUint8Array(ukatObj.token.scp)),
