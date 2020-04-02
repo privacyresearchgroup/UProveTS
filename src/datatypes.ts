@@ -84,7 +84,9 @@ export interface SerializedFirstMessage {
     sb: base64string[] // sa.length === sb.length
 }
 
-export interface SerializedSecondMessage {}
+export interface SerializedSecondMessage {
+    sc: base64string[]
+}
 
 export interface SerializedThirdMessage {
     sr: base64string[]
@@ -96,7 +98,9 @@ export interface FirstMessage {
     sb: GroupElement[]
 }
 
-export interface SecondMessage {}
+export interface SecondMessage {
+    sc: base64string[] // TODO ???
+}
 
 export interface ThirdMessage {
     sr: ZqElement[]
