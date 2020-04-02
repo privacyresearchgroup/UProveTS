@@ -9,9 +9,12 @@ import {
     SerializedThirdMessage,
     KeyAndToken,
     SerializedKeyAndToken,
+    SerializedIssuerParams,
 } from './datatypes'
 import { Hash } from './hash'
-import { base64ToUint8Array } from './utilities'
+import { base64ToUint8Array, base64ToArray } from './utilities'
+import L2048N256 from './SubgroupL2048N256'
+import ECP256 from './EcP256'
 
 export class IssuerParams implements IssuerParamsData, IssuerParamsFunctions {
     uidp: Uint8Array
@@ -118,6 +121,32 @@ export class IssuerParams implements IssuerParamsData, IssuerParamsFunctions {
             return { token, key }
         } catch (e) {
             throw new Error(`can't parse key and token: ${e}`)
+        }
+    }
+
+    static ParseIssuerParams(ipObj: SerializedIssuerParams): IssuerParams {
+        try {
+            if (!ipObj.uidp || !ipObj.descGq || !ipObj.e || !ipObj.g || !ipObj.s) {
+                throw new Error('missing field')
+            }
+
+            const uidp = base64ToUint8Array(ipObj.uidp)
+            let descGq
+            if (ipObj.descGq.name === L2048N256.OID) {
+                descGq = L2048N256 // or new L2048N256Object()?
+            } else if (ipObj.descGq.name === ECP256.OID) {
+                descGq = ECP256 // Or new ECP256Object()
+            } else {
+                throw new Error(`unknown group: ${ipObj.descGq.name}`)
+            }
+            const e = base64ToArray(ipObj.e)
+            const numAttribs = e.length
+            const g = descGq.getPreGenGenerators(numAttribs)
+            g[0] = descGq.getGq().createElementFromBytes(base64ToUint8Array(ipObj.g[0]))
+            const s = base64ToUint8Array(ipObj.s)
+            return new IssuerParams(uidp, descGq, g, e, s)
+        } catch (e) {
+            throw new Error(`can't parse issuer parameters: ${e}`)
         }
     }
 }
