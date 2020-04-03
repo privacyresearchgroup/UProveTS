@@ -13,16 +13,29 @@ import {
     GroupElement,
     ZqElement,
     IssuanceState,
+    SerializedBaseKeyAndToken,
+    ThirdMessage,
+    KeyAndToken,
+    ScopeData,
+    Proof,
+    IEProof,
 } from './datatypes'
-import { computeSigmaCPrime, computeXArray, multiModExp, uint8ArrayToBase64, computeXt } from './utilities'
+import {
+    computeSigmaCPrime,
+    computeXArray,
+    multiModExp,
+    uint8ArrayToBase64,
+    computeXt,
+    base64ToUint8Array,
+} from './utilities'
 
 export class Prover implements ProverData, ProverFunctions {
     rng: RandomNumberGenerator
     ip: IssuerParamsData & IssuerParamsFunctions
     Gq: Group
     Zq: Zq
-    ti?: number[]
-    pi?: number[]
+    ti?: Uint8Array
+    pi?: Uint8Array
     numberOfTokens = 0
     secondMsg: SecondMessage
     h?: GroupElement[]
@@ -43,8 +56,8 @@ export class Prover implements ProverData, ProverFunctions {
     generateSecondMessage(
         numberOfTokens: number,
         attributes: Attribute[],
-        ti: number[],
-        pi: number[],
+        ti: Uint8Array,
+        pi: Uint8Array,
         externalGamma: number[] | null,
         firstMsg: FirstMessage,
         skipTokenValidation: boolean
@@ -162,26 +175,90 @@ export class Prover implements ProverData, ProverFunctions {
     }
 
     // setIssuanceState: (state: import('./datatypes').IssuanceState) => void
-    // generateTokens: (thirdMsg: import('./datatypes').ThirdMessage) => import('./datatypes').SerializedBaseKeyAndToken[]
-    // generateProof: (
-    //     keyAndToken: import('./datatypes').KeyAndToken,
-    //     D: number[],
-    //     C: number[],
-    //     m: Uint8Array,
-    //     md: Uint8Array | null,
-    //     attributes: import('./datatypes').Attribute[],
-    //     scopeData: import('./datatypes').ScopeData | null,
-    //     commitmentPrivateValues: any
-    // ) => import('./datatypes').Proof
-    // verifiableEncrypt: (
-    //     escrowParams: any,
-    //     escrowPublicKey: any,
-    //     token: any,
-    //     additionalInfo: any,
-    //     proof: any,
-    //     commitmentPrivateValue: any,
-    //     commitmentBytes: any,
-    //     idAttribIndex: any,
-    //     attribute: any
-    // ) => import('./datatypes').IEProof
+    setIssuanceState(state: IssuanceState): void {
+        if (!state || !state.h || !state.alphaInverse || !state.beta2 || !state.sigmaZPrime || !state.sigmaCPrime) {
+            throw new Error('invalid state')
+        }
+        this.numberOfTokens = state.h.length
+        this.h = new Array(this.numberOfTokens)
+        this.alphaInverse = new Array(this.numberOfTokens)
+        this.beta2 = new Array(this.numberOfTokens)
+        this.sigmaZPrime = new Array(this.numberOfTokens)
+        this.sigmaCPrime = new Array(this.numberOfTokens)
+        if (state.tokenValidationValue) {
+            this.tokenValidationValue = new Array(this.numberOfTokens)
+        }
+        for (let i = 0; i < this.numberOfTokens; i++) {
+            this.h[i] = this.Gq.createElementFromBytes(base64ToUint8Array(state.h[i]))
+            this.alphaInverse[i] = this.Zq.createElementFromBytes(base64ToUint8Array(state.alphaInverse[i]))
+            this.beta2[i] = this.Zq.createElementFromBytes(base64ToUint8Array(state.beta2[i]))
+            this.sigmaZPrime[i] = this.Gq.createElementFromBytes(base64ToUint8Array(state.sigmaZPrime[i]))
+            this.sigmaCPrime[i] = this.Zq.createElementFromBytes(base64ToUint8Array(state.sigmaCPrime[i]))
+            if (state.tokenValidationValue) {
+                this.tokenValidationValue = this.tokenValidationValue || []
+                this.tokenValidationValue![i] = this.Gq.createElementFromBytes(
+                    base64ToUint8Array(state.tokenValidationValue[i])
+                )
+            }
+        }
+    }
+
+    generateTokens(thirdMsg: ThirdMessage): SerializedBaseKeyAndToken[] {
+        if (this.numberOfTokens !== thirdMsg.sr.length) {
+            throw new Error('invalid length for message')
+        }
+        const keyAndTokens = new Array(this.numberOfTokens)
+        for (let i = 0; i < this.numberOfTokens; i++) {
+            const sigmaR = thirdMsg.sr[i]
+            const sigmaRPrime = this.Zq.createElementFromInteger(0)
+            this.Zq.add(sigmaR, this.beta2![i], sigmaRPrime)
+
+            // validate the token
+            if (this.tokenValidationValue) {
+                const temp = this.Gq.getIdentityElement()
+                this.Gq.multiply(this.ip.descGq.getGenerator(), this.h![i], temp)
+                this.Gq.modexp(temp, sigmaRPrime, temp)
+                if (!this.tokenValidationValue[i].equals(temp)) {
+                    throw new Error(`invalid signature for token ${i}`)
+                }
+            }
+
+            keyAndTokens[i] = {
+                token: {
+                    h: uint8ArrayToBase64(this.h![i].toByteArrayUnsigned()),
+                    szp: uint8ArrayToBase64(this.sigmaZPrime![i].toByteArrayUnsigned()),
+                    scp: uint8ArrayToBase64(this.sigmaCPrime![i].toByteArrayUnsigned()),
+                    srp: uint8ArrayToBase64(sigmaRPrime.toByteArrayUnsigned()),
+                },
+                key: uint8ArrayToBase64(this.alphaInverse![i].toByteArrayUnsigned()),
+            }
+        }
+        return keyAndTokens
+    }
+
+    generateProof(
+        keyAndToken: KeyAndToken,
+        D: number[],
+        C: number[],
+        m: Uint8Array,
+        md: Uint8Array | null,
+        attributes: Attribute[],
+        scopeData: ScopeData | null,
+        commitmentPrivateValues: any
+    ): Proof | null {
+        return null
+    }
+    verifiableEncrypt(
+        escrowParams: any,
+        escrowPublicKey: any,
+        token: any,
+        additionalInfo: any,
+        proof: any,
+        commitmentPrivateValue: any,
+        commitmentBytes: any,
+        idAttribIndex: any,
+        attribute: any
+    ): IEProof | null {
+        return null
+    }
 }

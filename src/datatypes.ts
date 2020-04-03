@@ -162,8 +162,8 @@ export interface ProverFunctions {
     generateSecondMessage: (
         numberOfTokens: number,
         attributes: Attribute[],
-        ti: byte[], // TODO: is this Uint8Array?
-        pi: byte[], // TODO: is this Uint8Array?
+        ti: Uint8Array, // TODO: is this Uint8Array?
+        pi: Uint8Array, // TODO: is this Uint8Array?
         externalGamma: byte[] | null,
         firstMsg: FirstMessage,
         skipTokenValidation: boolean
@@ -180,7 +180,7 @@ export interface ProverFunctions {
         attributes: Attribute[],
         scopeData: ScopeData | null,
         commitmentPrivateValues: any
-    ) => Proof
+    ) => Proof | null
     verifiableEncrypt: (
         escrowParams: any,
         escrowPublicKey: any,
@@ -191,7 +191,7 @@ export interface ProverFunctions {
         commitmentBytes: any,
         idAttribIndex: any,
         attribute: any
-    ) => IEProof
+    ) => IEProof | null
 }
 
 // Hash
