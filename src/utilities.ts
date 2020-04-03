@@ -1,7 +1,10 @@
 import { Hash } from './hash'
 import { Attribute } from './datatypes'
 
-export function uint8ArrayToBase64(bytes: number[]): string {
+export function uint8ArrayToBase64(bytes: Uint8Array | number[]): string {
+    if (!Array.isArray(bytes)) {
+        bytes = Array.from(bytes)
+    }
     return btoa(String.fromCharCode.apply(null, bytes))
 }
 
