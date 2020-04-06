@@ -36,7 +36,7 @@
 
 import cryptoMath from './cryptoMath'
 import msrcryptoUtilities from './utilities'
-import { createProperty } from './global'
+import { createProperty, setterSupport } from './global'
 
 function MsrcryptoECC() {
   /// <summary>Elliptic Curve Cryptography (ECC) funcions.</summary>

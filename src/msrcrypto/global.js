@@ -36,7 +36,7 @@
 export const msrcryptoHashFunctions = {}
 
 // Property setter/getter support IE9+.
-var setterSupport = (function () {
+export const setterSupport = (function () {
   try {
     Object.defineProperty({}, 'oncomplete', {})
     return true
