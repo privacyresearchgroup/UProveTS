@@ -1,6 +1,5 @@
 import cryptoMath from './msrcrypto/cryptoMath'
 import { HashFunctions } from './datatypes'
-import { Hash } from './hash'
 
 // tslint:disable: number-literal-format
 class SGGroup {
