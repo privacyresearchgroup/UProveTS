@@ -9,7 +9,13 @@ import {
     SerializedUProveToken,
     SerializedBaseKeyAndToken,
 } from '../datatypes'
-import { readHexString, readFileDataInDictionary, performanceTimer, readNumberList } from '../testutilities/utilities'
+import {
+    readHexString,
+    readFileDataInDictionary,
+    performanceTimer,
+    readNumberList,
+    readVectorElement,
+} from '../testutilities/utilities'
 import cryptoMath from '../msrcrypto/cryptoMath'
 import ECP256 from '../EcP256'
 import L2048N256 from '../SubgroupL2048N256'
@@ -28,14 +34,6 @@ const testVectorFile = 'testvectors_' + (testECC ? 'EC' : 'SG') + '_D2' + (testL
 const recommendedParamsFile = 'UProveRecommendedParams' + (testECC ? 'P256' : 'L2048N256') + '.txt'
 const params = readFileDataInDictionary(recommendedParamsFile)
 const vectors = readFileDataInDictionary(testVectorFile)
-
-export function readVectorElement(group, vectors, label, isEcGq = false): GroupElement {
-    if (isEcGq) {
-        return group.createPoint(readHexString(vectors[label + '.x']), readHexString(vectors[label + '.y']))
-    } else {
-        return group.createElementFromBytes(readHexString(vectors[label]))
-    }
-}
 
 class ProverUnitTest {
     numAttribs: number

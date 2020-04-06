@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { GroupElement } from '../datatypes'
 
 export const performanceTimer = performance || Date // performance not supported on Safari
 export const testVectorDirectory = 'src/__tests__/TestVectors'
@@ -73,4 +74,12 @@ export function readRecommendedParams(filename: string): { [k: string]: any } {
         vectors[lineData[0]] = lineData[1]
     }
     return vectors
+}
+
+export function readVectorElement(group, vectors, label, isEcGq = false): GroupElement {
+    if (isEcGq) {
+        return group.createPoint(readHexString(vectors[label + '.x']), readHexString(vectors[label + '.y']))
+    } else {
+        return group.createElementFromBytes(readHexString(vectors[label]))
+    }
 }

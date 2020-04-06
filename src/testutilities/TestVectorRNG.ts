@@ -1,5 +1,5 @@
 import { Zq, ZqElement } from '../datatypes'
-import { readVectorElement } from '../__tests__/issuance.test'
+import { readVectorElement } from './utilities'
 
 export class TestVectorRNG {
     values: ZqElement[]
