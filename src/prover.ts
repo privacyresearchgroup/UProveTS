@@ -27,7 +27,11 @@ import {
     uint8ArrayToBase64,
     computeXt,
     base64ToUint8Array,
+    computeX,
+    generateChallenge,
+    ATimesBPlusCModQ,
 } from './utilities'
+import { Hash } from './hash'
 
 export class Prover implements ProverData, ProverFunctions {
     rng: RandomNumberGenerator
@@ -245,8 +249,174 @@ export class Prover implements ProverData, ProverFunctions {
         attributes: Attribute[],
         scopeData: ScopeData | null,
         commitmentPrivateValues: any
-    ): Proof | null {
-        return null
+    ): Proof {
+        if (!keyAndToken || !keyAndToken.key || !keyAndToken.token) {
+            throw new Error('invalid key and token')
+        }
+        const n = this.ip.e.length
+        const t = n + 1
+        if (n !== attributes.length) {
+            throw new Error('wrong number of attributes')
+        }
+        if (scopeData) {
+            if (!scopeData.p || scopeData.p <= 0 || scopeData.p >= n) {
+                throw new Error('invalid pseudonym index: ' + scopeData.p)
+            }
+            if (!scopeData.s && !scopeData.gs) {
+                throw new Error('either scopeData.s or scopeData.gs must be set')
+            }
+        }
+
+        const token = keyAndToken.token
+
+        // make sure D and C arrays is sorted
+        D.sort((a, b) => a - b) // from Crockford's "JavaScript: the good parts"
+        if (C) {
+            C.sort((a, b) => a - b) // from Crockford's "JavaScript: the good parts"
+        }
+        const x = new Array(n + 2)
+        const size = 1 + (n - D.length)
+        const disclosedA = new Array(D.length)
+        const disclosedX = new Array(D.length)
+        const w = new Array(size)
+        const bases = new Array(size)
+        w[0] = this.rng.getRandomZqElement()
+        bases[0] = token.h
+        let uIndex = 1
+        let dIndex = 0
+        let cIndex = 0
+        let wpIndex = 0
+        const commitmentData: any = {}
+        if (C) {
+            commitmentData.tildeC = new Array(C.length)
+            commitmentData.tildeA = new Array(C.length)
+            commitmentData.tildeO = new Array(C.length)
+            commitmentData.tildeW = new Array(C.length)
+        }
+        for (let i = 1; i <= n; i++) {
+            x[i] = computeX(this.Zq, attributes[i - 1], this.ip.e[i - 1])
+
+            if (i === D[dIndex]) {
+                // xi is disclosed
+                disclosedX[dIndex] = x[i]
+                disclosedA[dIndex] = uint8ArrayToBase64(attributes[i - 1])
+                dIndex++
+            } else {
+                // xi is undisclosed
+                w[uIndex] = this.rng.getRandomZqElement()
+                bases[uIndex] = this.ip.g[i]
+                if (scopeData && scopeData.p === i) {
+                    wpIndex = uIndex
+                }
+
+                if (C && C.lastIndexOf(i) >= 0) {
+                    // xi is committed
+                    commitmentData.tildeO[cIndex] = this.rng.getRandomZqElement()
+                    commitmentData.tildeW[cIndex] = this.rng.getRandomZqElement()
+                    const cBases = [this.ip.descGq.getGenerator(), this.ip.g[1]]
+                    commitmentData.tildeC[cIndex] = multiModExp(this.Gq, cBases, [x[i], commitmentData.tildeO[cIndex]])
+                    const tildeAInput = multiModExp(this.Gq, cBases, [w[uIndex], commitmentData.tildeW[cIndex]])
+                    const hash = new Hash()
+                    hash.updateBytes(tildeAInput.toByteArrayUnsigned())
+                    commitmentData.tildeA[cIndex] = hash.digest()
+                    cIndex++
+                }
+
+                uIndex++
+            }
+        }
+        x[t] = computeXt(this.Zq, this.ip, token.ti) // xt
+        const aInput = multiModExp(this.Gq, bases, w)
+        const hash = new Hash()
+        hash.updateBytes(aInput.toByteArrayUnsigned())
+        const a = hash.digest()
+        let ap: Uint8Array | null = null
+        let Ps: GroupElement | null = null
+        if (scopeData) {
+            let gs
+            if (scopeData.gs) {
+                gs = this.Gq.createElementFromBytes(scopeData.gs)
+            } else {
+                gs = this.ip.descGq.generateScopeElement(scopeData.s)
+            }
+            const apInput = this.Gq.getIdentityElement()
+            this.Gq.modexp(gs, w[wpIndex], apInput)
+            const hash = new Hash()
+            hash.updateBytes(apInput.toByteArrayUnsigned())
+            ap = hash.digest()
+            Ps = this.Gq.getIdentityElement()
+            this.Gq.modexp(gs, x[scopeData.p], Ps)
+        }
+
+        const c = generateChallenge(
+            this.Zq,
+            this.ip,
+            token,
+            a,
+            D,
+            disclosedX,
+            C,
+            commitmentData.tildeC,
+            commitmentData.tildeA,
+            scopeData ? scopeData.p : 0,
+            ap,
+            Ps,
+            m,
+            md
+        )
+        const cNegate = this.Zq.createElementFromInteger(0)
+        this.Zq.subtract(this.Zq.createElementFromInteger(0), c, cNegate)
+
+        const r = new Array(size)
+        r[0] = uint8ArrayToBase64(ATimesBPlusCModQ(this.Zq, c, keyAndToken.key, w[0]).toByteArrayUnsigned())
+        dIndex = 0
+        uIndex = 1
+        for (let i = 1; i <= n; i++) {
+            if (i === D[dIndex]) {
+                // xi is disclosed
+                dIndex++
+            } else {
+                // xi is undisclosed, compute a response
+                r[uIndex] = uint8ArrayToBase64(
+                    ATimesBPlusCModQ(this.Zq, cNegate, x[i], w[uIndex]).toByteArrayUnsigned()
+                )
+                uIndex++
+            }
+        }
+        if (C) {
+            commitmentData.tildeR = new Array(C.length)
+            for (let i = 0; i < C.length; i++) {
+                commitmentData.tildeR[i] = uint8ArrayToBase64(
+                    ATimesBPlusCModQ(
+                        this.Zq,
+                        cNegate,
+                        commitmentData.tildeO[i],
+                        commitmentData.tildeW[i]
+                    ).toByteArrayUnsigned()
+                )
+                commitmentData.tildeC[i] = uint8ArrayToBase64(commitmentData.tildeC[i].toByteArrayUnsigned())
+                commitmentData.tildeA[i] = uint8ArrayToBase64(commitmentData.tildeA[i])
+            }
+        }
+
+        const proof: Proof = {
+            D: disclosedA,
+            a: uint8ArrayToBase64(a),
+            r,
+        }
+        if (scopeData) {
+            proof.ap = uint8ArrayToBase64(ap!)
+            proof.Ps = uint8ArrayToBase64(Ps!.toByteArrayUnsigned())
+        }
+        if (C) {
+            proof.tc = commitmentData.tildeC
+            proof.ta = commitmentData.tildeA
+            proof.tr = commitmentData.tildeR
+        }
+        if (commitmentPrivateValues && commitmentData.tildeO) {
+            commitmentPrivateValues.tildeO = commitmentData.tildeO
+        }
+        return proof
     }
     verifiableEncrypt(
         escrowParams: any,

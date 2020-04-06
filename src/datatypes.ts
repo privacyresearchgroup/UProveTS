@@ -180,7 +180,7 @@ export interface ProverFunctions {
         attributes: Attribute[],
         scopeData: ScopeData | null,
         commitmentPrivateValues: any
-    ) => Proof | null
+    ) => Proof
     verifiableEncrypt: (
         escrowParams: any,
         escrowPublicKey: any,
