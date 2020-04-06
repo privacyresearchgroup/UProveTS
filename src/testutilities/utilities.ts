@@ -10,7 +10,7 @@ export function readNumberList(s: string): number[] {
 
     for (let i = 0; i < elements.length; i++) {
         const n = elements[i].valueOf()
-        array[i] = n
+        array[i] = parseInt(n, 10)
     }
 
     return array
