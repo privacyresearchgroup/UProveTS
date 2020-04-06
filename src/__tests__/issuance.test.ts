@@ -7,6 +7,7 @@ import {
     UProveToken,
     SerializedKeyAndToken,
     SerializedUProveToken,
+    SerializedBaseKeyAndToken,
 } from '../datatypes'
 import { readHexString, readFileDataInDictionary, performanceTimer, readNumberList } from '../testutilities/utilities'
 import cryptoMath from '../msrcrypto/cryptoMath'
@@ -22,7 +23,7 @@ import { TestVectorRNG } from '../testutilities/TestVectorRNG'
 let totalTime = 0
 
 const testLiteMode = true // lite;
-const testECC = false //  ecc;
+const testECC = true //  ecc;
 const testVectorFile = 'testvectors_' + (testECC ? 'EC' : 'SG') + '_D2' + (testLiteMode ? '_lite' : '') + '_doc.txt'
 const recommendedParamsFile = 'UProveRecommendedParams' + (testECC ? 'P256' : 'L2048N256') + '.txt'
 const params = readFileDataInDictionary(recommendedParamsFile)
@@ -51,6 +52,8 @@ class ProverUnitTest {
     attributes: Attribute[]
     ti: Uint8Array
     pi: Uint8Array
+
+    keyAndToken?: SerializedBaseKeyAndToken[]
 
     constructor(numAttribs, params, vectors) {
         this.numAttribs = numAttribs
@@ -105,7 +108,7 @@ class ProverUnitTest {
         }
     }
 
-    verifyComputation(group, v, vName, isEcGq = this.useECC): boolean {
+    verifyComputation(group, v, vName, isEcGq): boolean {
         return v.equals(readVectorElement(group, this.vectors, vName, isEcGq))
     }
     verifyArrayComputation(v, vName): boolean {
@@ -123,9 +126,9 @@ test('test xi, xt computation', () => {
     const { Zq, attributes, ip, ti } = proverTest
     const x = computeXArray(Zq, attributes, ip.e)
     for (let i = 1; i <= proverTest.numAttribs; i++) {
-        expect(proverTest.verifyComputation(Zq, x[i - 1], `x${i}`)).toBeTruthy()
+        expect(proverTest.verifyComputation(Zq, x[i - 1], `x${i}`, false)).toBeTruthy()
     }
-    expect(proverTest.verifyComputation(Zq, computeXt(Zq, ip, ti), 'xt')).toBeTruthy()
+    expect(proverTest.verifyComputation(Zq, computeXt(Zq, ip, ti), 'xt', false)).toBeTruthy()
 })
 
 test('test second message', () => {
@@ -139,21 +142,26 @@ test('test second message', () => {
 
     console.log(`Generate second message time: ${time}`)
     expect(
-        proverTest.verifyComputation(Zq, Zq.createModElementFromBytes(base64ToUint8Array(secondMsg.sc[0])), 'sigmaC')
+        proverTest.verifyComputation(
+            Zq,
+            Zq.createModElementFromBytes(base64ToUint8Array(secondMsg.sc[0])),
+            'sigmaC',
+            false
+        )
     ).toBeTruthy()
 })
 
 test('generate token', () => {
     const { prover, Gq, Zq, useECC } = proverTest
     const thirdMsg = {
-        sr: [readVectorElement(Zq, vectors, 'sigmaR')],
+        sr: [readVectorElement(Zq, vectors, 'sigmaR', false)],
     }
     const t1 = performanceTimer.now()
-    const keyAndToken = prover.generateTokens(thirdMsg)
+    proverTest.keyAndToken = prover.generateTokens(thirdMsg)
     const time = performanceTimer.now() - t1
     console.log(`generate token time: ${time}`)
     totalTime += time
-    const token = keyAndToken[0].token
+    const token = proverTest.keyAndToken[0].token
     expect(
         proverTest.verifyComputation(Gq, Gq.createElementFromBytes(base64ToUint8Array(token.h)), 'h', useECC)
     ).toBeTruthy()
@@ -166,62 +174,78 @@ test('generate token', () => {
         )
     ).toBeTruthy()
     expect(
-        proverTest.verifyComputation(Zq, Zq.createModElementFromBytes(base64ToUint8Array(token.scp)), 'sigmaCPrime')
+        proverTest.verifyComputation(
+            Zq,
+            Zq.createModElementFromBytes(base64ToUint8Array(token.scp)),
+            'sigmaCPrime',
+            false
+        )
     ).toBeTruthy()
     expect(
-        proverTest.verifyComputation(Zq, Zq.createModElementFromBytes(base64ToUint8Array(token.srp)), 'sigmaRPrime')
+        proverTest.verifyComputation(
+            Zq,
+            Zq.createModElementFromBytes(base64ToUint8Array(token.srp)),
+            'sigmaRPrime',
+            false
+        )
     ).toBeTruthy()
 })
 
-// test('generate proof', () => {
-//     const { prover, Gq, Zq, useECC, ip, ti, pi, attributes } = proverTest
-//     const thirdMsg = {
-//         sr: [readVectorElement(Zq, vectors, 'sigmaR')],
-//     }
-//     const keyAndBaseToken = prover.generateTokens(thirdMsg)
-//     const token: SerializedUProveToken = {
-//         ...keyAndBaseToken[0].token,
-//         uidp: uint8ArrayToBase64(ip.uidp),
-//         ti: uint8ArrayToBase64(ti),
-//         pi: uint8ArrayToBase64(pi),
-//     }
-//     const { key } = keyAndBaseToken[0]
+test('generate proof', () => {
+    const { prover, Gq, Zq, useECC, ip, ti, pi, attributes } = proverTest
 
-//     const disclosed = readNumberList(vectors['D'])
-//     const committed = null
-//     const undisclosed = readNumberList(vectors['U'])
-//     const message = readHexString(vectors['m'])
-//     const messageD = readHexString(vectors['md'])
-//     const scopeData = null
-//     const commitmentPrivateValues = {}
-//     const t1 = performanceTimer.now()
-//     const ukat = ip.ParseKeyAndToken({ key, token })
-//     const proof = prover.generateProof(
-//         ukat,
-//         disclosed,
-//         committed || [],
-//         message,
-//         messageD,
-//         attributes,
-//         scopeData,
-//         commitmentPrivateValues
-//     )
-//     const time = performanceTimer.now() - t1
-//     const dSize = disclosed.length
+    const keyAndBaseToken = proverTest.keyAndToken!
+    const token: SerializedUProveToken = {
+        ...keyAndBaseToken[0].token,
+        uidp: uint8ArrayToBase64(ip.uidp),
+        ti: uint8ArrayToBase64(ti),
+        pi: uint8ArrayToBase64(pi),
+    }
+    const { key } = keyAndBaseToken[0]
 
-//     proverTest.verifyArrayComputation(base64ToUint8Array(proof!.a), 'a')
-//     if (!testLiteMode) {
-//         proverTest.verifyArrayComputation(base64ToUint8Array(proof!.ap), 'ap')
-//     }
-//     if (!testLiteMode) {
-//         proverTest.verifyComputation(Gq, Gq.createElementFromBytes(base64ToUint8Array(proof!.Ps)), 'Ps', useECC)
-//     }
-//     proverTest.verifyComputation(Zq, Zq.createModElementFromBytes(base64ToUint8Array(proof!.r[0])), 'r0')
-//     for (let i = 1; i <= undisclosed.length; i++) {
-//         proverTest.verifyComputation(
-//             Zq,
-//             Zq.createModElementFromBytes(base64ToUint8Array(proof!.r[i])),
-//             'r' + undisclosed[i - 1]
-//         )
-//     }
-// })
+    const disclosed = readNumberList(vectors['D'])
+    const committed = null
+    const undisclosed = readNumberList(vectors['U'])
+    const message = readHexString(vectors['m'])
+    const messageD = readHexString(vectors['md'])
+    const scopeData = null
+    const commitmentPrivateValues = {}
+    const t1 = performanceTimer.now()
+    const ukat = ip.ParseKeyAndToken({ key, token })
+
+    const proof = prover.generateProof(
+        ukat,
+        disclosed,
+        committed || [],
+        message,
+        messageD,
+        attributes,
+        scopeData,
+        commitmentPrivateValues
+    )
+    const time = performanceTimer.now() - t1
+    const dSize = disclosed.length
+
+    expect(proverTest.verifyArrayComputation(base64ToUint8Array(proof!.a), 'a')).toBeTruthy()
+    if (!testLiteMode) {
+        expect(proverTest.verifyArrayComputation(base64ToUint8Array(proof!.ap), 'ap')).toBeTruthy()
+    }
+    if (!testLiteMode) {
+        expect(
+            proverTest.verifyComputation(Gq, Gq.createElementFromBytes(base64ToUint8Array(proof!.Ps)), 'Ps', useECC)
+        ).toBeTruthy()
+    }
+    expect(
+        proverTest.verifyComputation(Zq, Zq.createModElementFromBytes(base64ToUint8Array(proof!.r[0])), 'r0', false)
+    ).toBeTruthy()
+    for (let i = 1; i <= undisclosed.length; i++) {
+        expect(
+            proverTest.verifyComputation(
+                Zq,
+                Zq.createModElementFromBytes(base64ToUint8Array(proof!.r[i])),
+                'r' + undisclosed[i - 1],
+                false
+            )
+        ).toBeTruthy()
+    }
+})
