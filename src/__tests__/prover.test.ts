@@ -1,13 +1,14 @@
 import {
-    GroupElement,
-    Group,
     Zq,
     Attribute,
     SerializedFirstMessage,
-    UProveToken,
-    SerializedKeyAndToken,
     SerializedUProveToken,
     SerializedBaseKeyAndToken,
+    DLGroup,
+    MultiplicativeGroup,
+    ZqField,
+    FirstMessage,
+    ZqElement,
 } from '../datatypes'
 import {
     readHexString,
@@ -41,9 +42,9 @@ class ProverUnitTest {
     params: any[]
     vectors: { [k: string]: any }
     useECC: boolean
-    Group: Group
-    Gq: Group
-    Zq: Zq
+    Group: DLGroup
+    Gq: MultiplicativeGroup
+    Zq: ZqField
     ip: IssuerParams
     prover: Prover
 
@@ -98,7 +99,7 @@ class ProverUnitTest {
         return attributes
     }
 
-    loadFirstMessage(): SerializedFirstMessage {
+    loadFirstMessage(): FirstMessage {
         return {
             sz: readVectorElement(this.Gq, this.vectors, 'sigmaZ', this.useECC),
             sa: [readVectorElement(this.Gq, this.vectors, 'sigmaA', this.useECC)],
@@ -134,7 +135,7 @@ test('test second message', () => {
     const firstMsg = proverTest.loadFirstMessage()
     const gamma = readVectorElement(proverTest.Gq, proverTest.vectors, 'gamma', proverTest.useECC).toByteArrayUnsigned()
     const t1 = performanceTimer.now()
-    const secondMsg = proverTest.prover.generateSecondMessage(1, attributes, ti, pi, gamma, firstMsg, false)
+    const secondMsg = proverTest.prover.generateSecondMessage(1, attributes, ti, pi, Array.from(gamma), firstMsg, false)
     const time = performanceTimer.now() - t1
     totalTime += time
 
@@ -152,7 +153,7 @@ test('test second message', () => {
 test('generate token', () => {
     const { prover, Gq, Zq, useECC } = proverTest
     const thirdMsg = {
-        sr: [readVectorElement(Zq, vectors, 'sigmaR', false)],
+        sr: [(readVectorElement(Zq, vectors, 'sigmaR', false) as unknown) as ZqElement],
     }
     const t1 = performanceTimer.now()
     proverTest.keyAndToken = prover.generateTokens(thirdMsg)

@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { GroupElement } from '../datatypes'
+import { GroupElement, ZqElement } from '../datatypes'
 
 export const performanceTimer = performance || Date // performance not supported on Safari
 export const testVectorDirectory = 'src/__tests__/TestVectors'
@@ -82,4 +82,8 @@ export function readVectorElement(group, vectors, label, isEcGq = false): GroupE
     } else {
         return group.createElementFromBytes(readHexString(vectors[label]))
     }
+}
+
+export function readVectorZqElement(group, vectors, label): ZqElement {
+    return group.createElementFromBytes(readHexString(vectors[label]))
 }

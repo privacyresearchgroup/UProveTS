@@ -1,7 +1,7 @@
 import {
     IssuerParamsData,
     IssuerParamsFunctions,
-    Group,
+    DLGroup,
     GroupElement,
     FirstMessage,
     SerializedFirstMessage,
@@ -18,13 +18,13 @@ import ECP256 from './EcP256'
 
 export class IssuerParams implements IssuerParamsData, IssuerParamsFunctions {
     uidp: Uint8Array
-    descGq: Group
+    descGq: DLGroup
     e: number[]
     g: GroupElement[]
     s: Uint8Array
     P?: Uint8Array
 
-    constructor(uidp: Uint8Array, descGq: Group, g: GroupElement[], e: number[], s: Uint8Array) {
+    constructor(uidp: Uint8Array, descGq: DLGroup, g: GroupElement[], e: number[], s: Uint8Array) {
         this.uidp = uidp
         this.descGq = descGq
         this.g = g

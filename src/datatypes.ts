@@ -12,7 +12,7 @@ export interface SerializedIssuerParams {
 
 export interface IssuerParamsData {
     uidp: Uint8Array
-    descGq: Group
+    descGq: GroupDescription
     e: number[]
     g: GroupElement[]
     s: Uint8Array
@@ -30,10 +30,59 @@ export interface SerializedGroupDescription {
     name: base64string
 }
 
-export type Group = any
-export type GroupElement = any
-export type Zq = any
-export type ZqElement = any
+export type Zq = ZqField
+
+export interface GroupElement {
+    equals: (g: GroupElement) => boolean
+    copyTo: (source: GroupElement, destination: GroupElement) => void
+    clone: () => GroupElement
+    toByteArrayUnsigned: () => Uint8Array
+}
+
+export interface ZqElement {
+    m_digits: number[]
+    m_group: Zq
+    equals: (g: GroupElement) => boolean
+    toByteArrayUnsigned: () => number[]
+}
+
+export interface MultiplicativeGroup {
+    createElementFromBytes: (bs: Uint8Array | number[]) => GroupElement
+    getIdentityElement: () => GroupElement
+    modexp: (g: GroupElement, s: ZqElement, result: GroupElement) => void
+    multiply: (a: GroupElement, b: GroupElement, result: GroupElement) => void
+}
+
+export interface DLGroup {
+    getGq: () => MultiplicativeGroup
+    getZq: () => ZqField
+    updateHash: (h: HashFunctions) => void
+    getGenerator: () => GroupElement
+    getPreGenGenerators: (n: number) => GroupElement[]
+}
+
+export interface GroupDescription {
+    getGq: () => MultiplicativeGroup
+    getZq: () => Zq
+    updateHash: (h: HashFunctions) => void
+    getGenerator: () => GroupElement
+    getPreGenGenerators: (n: number) => GroupElement[]
+}
+
+export interface ZqField {
+    m_modulus: number[]
+    m_digitWidth: number
+    createElementFromBytes: (bs: Uint8Array | number[]) => ZqElement
+    createElementFromDigits: (ds: number[]) => ZqElement
+    getIdentityElement: () => ZqElement
+    createModElementFromBytes: (bs: Uint8Array) => ZqElement
+    createElementFromInteger: (n: number) => ZqElement
+    modexp: (g: ZqElement, s: ZqElement, result: ZqElement) => void
+    multiply: (a: ZqElement, b: ZqElement, result: ZqElement) => void
+    inverse: (a: ZqElement, result: ZqElement) => void
+    add: (a: ZqElement, b: ZqElement, result: ZqElement) => void
+    subtract: (a: ZqElement, b: ZqElement, result: ZqElement) => void
+}
 
 // UProve Token
 
@@ -73,7 +122,7 @@ export interface SerializedKeyAndToken {
 
 export interface KeyAndToken {
     token: UProveToken
-    key: Uint8Array
+    key: ZqElement
 }
 
 // Messages
@@ -113,7 +162,7 @@ export type RandomNumberGenerator = any
 export interface ProverData {
     rng: RandomNumberGenerator
     ip: IssuerParamsData & IssuerParamsFunctions
-    Gq: Group
+    Gq: MultiplicativeGroup
     Zq: Zq
 }
 

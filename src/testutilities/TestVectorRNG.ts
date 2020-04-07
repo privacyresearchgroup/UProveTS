@@ -1,5 +1,5 @@
 import { Zq, ZqElement } from '../datatypes'
-import { readVectorElement } from './utilities'
+import { readVectorZqElement } from './utilities'
 
 export class TestVectorRNG {
     values: ZqElement[]
@@ -26,31 +26,31 @@ export class TestVectorRNG {
         this.values = lite
             ? [
                   // lite version
-                  readVectorElement(Zq, vectors, 'alpha'),
-                  readVectorElement(Zq, vectors, 'beta1'),
-                  readVectorElement(Zq, vectors, 'beta2'),
-                  readVectorElement(Zq, vectors, 'w0'),
-                  readVectorElement(Zq, vectors, 'w1'),
-                  readVectorElement(Zq, vectors, 'w3'),
-                  readVectorElement(Zq, vectors, 'w4'),
+                  readVectorZqElement(Zq, vectors, 'alpha'),
+                  readVectorZqElement(Zq, vectors, 'beta1'),
+                  readVectorZqElement(Zq, vectors, 'beta2'),
+                  readVectorZqElement(Zq, vectors, 'w0'),
+                  readVectorZqElement(Zq, vectors, 'w1'),
+                  readVectorZqElement(Zq, vectors, 'w3'),
+                  readVectorZqElement(Zq, vectors, 'w4'),
               ]
             : [
                   // full version
-                  readVectorElement(Zq, vectors, 'alpha'),
-                  readVectorElement(Zq, vectors, 'beta1'),
-                  readVectorElement(Zq, vectors, 'beta2'),
-                  readVectorElement(Zq, vectors, 'w0'),
-                  readVectorElement(Zq, vectors, 'w1'),
-                  readVectorElement(Zq, vectors, 'tildeO1'),
-                  readVectorElement(Zq, vectors, 'tildeW1'),
-                  readVectorElement(Zq, vectors, 'w3'),
-                  readVectorElement(Zq, vectors, 'w4'),
-                  readVectorElement(Zq, vectors, 'tildeO4'),
-                  readVectorElement(Zq, vectors, 'tildeW4'),
-                  readVectorElement(Zq, vectors, 'ie_r'),
-                  readVectorElement(Zq, vectors, 'ie_xbPrime'),
-                  readVectorElement(Zq, vectors, 'ie_obPrime'),
-                  readVectorElement(Zq, vectors, 'ie_rPrime'),
+                  readVectorZqElement(Zq, vectors, 'alpha'),
+                  readVectorZqElement(Zq, vectors, 'beta1'),
+                  readVectorZqElement(Zq, vectors, 'beta2'),
+                  readVectorZqElement(Zq, vectors, 'w0'),
+                  readVectorZqElement(Zq, vectors, 'w1'),
+                  readVectorZqElement(Zq, vectors, 'tildeO1'),
+                  readVectorZqElement(Zq, vectors, 'tildeW1'),
+                  readVectorZqElement(Zq, vectors, 'w3'),
+                  readVectorZqElement(Zq, vectors, 'w4'),
+                  readVectorZqElement(Zq, vectors, 'tildeO4'),
+                  readVectorZqElement(Zq, vectors, 'tildeW4'),
+                  readVectorZqElement(Zq, vectors, 'ie_r'),
+                  readVectorZqElement(Zq, vectors, 'ie_xbPrime'),
+                  readVectorZqElement(Zq, vectors, 'ie_obPrime'),
+                  readVectorZqElement(Zq, vectors, 'ie_rPrime'),
               ]
     }
 

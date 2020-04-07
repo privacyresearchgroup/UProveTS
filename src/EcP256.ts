@@ -23,10 +23,10 @@
 
 import cryptoMath from './msrcrypto/cryptoMath'
 import cryptoECC from './msrcrypto/cryptoECC'
-import { HashFunctions } from './datatypes'
+import { HashFunctions, MultiplicativeGroup, DLGroup } from './datatypes'
 import { Hash } from './hash'
 
-export class ECGroup {
+export class ECGroup implements MultiplicativeGroup {
     curve: any
     ecOperator: any
 
@@ -120,7 +120,7 @@ export class ECGroup {
     }
 }
 
-class ECP256Object {
+class ECP256Object implements DLGroup {
     // number of pregenerated generators
     n = 50
     // gt index

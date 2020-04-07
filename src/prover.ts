@@ -3,7 +3,6 @@ import {
     ProverFunctions,
     IssuerParamsFunctions,
     IssuerParamsData,
-    Group,
     Zq,
     RandomNumberGenerator,
     SerializedSecondMessage,
@@ -19,6 +18,7 @@ import {
     ScopeData,
     Proof,
     IEProof,
+    MultiplicativeGroup,
 } from './datatypes'
 import {
     computeSigmaCPrime,
@@ -36,7 +36,7 @@ import { Hash } from './hash'
 export class Prover implements ProverData, ProverFunctions {
     rng: RandomNumberGenerator
     ip: IssuerParamsData & IssuerParamsFunctions
-    Gq: Group
+    Gq: MultiplicativeGroup
     Zq: Zq
     ti?: Uint8Array
     pi?: Uint8Array
@@ -337,7 +337,8 @@ export class Prover implements ProverData, ProverFunctions {
             if (scopeData.gs) {
                 gs = this.Gq.createElementFromBytes(scopeData.gs)
             } else {
-                gs = this.ip.descGq.generateScopeElement(scopeData.s)
+                throw new Error('generateScopeElement not implemented')
+                // gs = this.ip.descGq.generateScopeElement(scopeData.s)
             }
             const apInput = this.Gq.getIdentityElement()
             this.Gq.modexp(gs, w[wpIndex], apInput)

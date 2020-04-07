@@ -1,8 +1,8 @@
 import cryptoMath from './msrcrypto/cryptoMath'
-import { HashFunctions } from './datatypes'
+import { HashFunctions, MultiplicativeGroup, DLGroup } from './datatypes'
 
 // tslint:disable: number-literal-format
-class SGGroup {
+class SGGroup implements MultiplicativeGroup {
     integerGroup: any
     constructor(integerGroup) {
         this.integerGroup = integerGroup
@@ -29,7 +29,7 @@ class SGGroup {
     }
 }
 
-class L2048N256Object {
+class L2048N256Object implements DLGroup {
     // recommended parameters
 
     p = Uint8Array.from([
@@ -13981,7 +13981,7 @@ class L2048N256Object {
     getGq = () => this.Gq
 
     Zq = cryptoMath.IntegerGroup(this.q)
-    getZq = () => this.Zq
+    getZq = () => ({ ...this.Zq, getIdentityElement: () => this.Zq.createElementFromInteger(1) })
 
     getGenerator = () => this.Gq.createElementFromBytes(this.g)
 
