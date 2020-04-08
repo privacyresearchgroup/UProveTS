@@ -41,7 +41,7 @@ export class Prover implements ProverData, ProverFunctions {
     ti?: Uint8Array
     pi?: Uint8Array
     numberOfTokens = 0
-    secondMsg: SecondMessage
+    secondMsg: SerializedSecondMessage
     h?: GroupElement[]
     alphaInverse?: ZqElement[]
     beta2?: ZqElement[]
