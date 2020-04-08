@@ -71,7 +71,6 @@ export class IssuerSession {
         const sigmaZ = this._modExp(this._gamma, y0)
 
         const sasb = this._w.map((w: ZqElement) => this._computeFirstMessage(w))
-        console.log({ w: this._w, sasb })
         this.firstMessage = {
             sz: sigmaZ,
             sa: sasb.map((entry: PartialFirstMessage) => entry.sa),
@@ -93,7 +92,6 @@ export class IssuerSession {
     private _computeFirstMessage(w: ZqElement): PartialFirstMessage {
         const sigmaA = this._modExp(this.ip.g[0], w)
         const sigmaB = this._modExp(this._gamma, w)
-        console.log({ sigmaA, sigmaB })
         return { sa: sigmaA, sb: sigmaB }
     }
     private _computeGamma(): GroupElement {
