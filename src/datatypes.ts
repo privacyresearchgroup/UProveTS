@@ -148,7 +148,7 @@ export interface FirstMessage {
 }
 
 export interface SecondMessage {
-    sc: base64string[] // TODO ???
+    sc: ZqElement[]
 }
 
 export interface ThirdMessage {
