@@ -53,12 +53,17 @@ export class IssuerSession {
         ti: Uint8Array
     ) {
         this.ip = ip
-        this._w = Array(_numTokens).map(() => rng.getRandomZqElement())
-        this._gamma = this._computeGamma()
+        this._w = Array(_numTokens)
+        for (let i = 0; i < _numTokens; ++i) {
+            this._w[i] = rng.getRandomZqElement()
+        }
         this.Gq = ip.descGq.getGq()
         this.Zq = ip.descGq.getZq()
         this.attributes = attributes
         this.ti = ti
+
+        console.log(`this._w`, this._w)
+        this._gamma = this._computeGamma()
     }
 
     private _prepareFirstMessages(): void {
@@ -66,6 +71,7 @@ export class IssuerSession {
         const sigmaZ = this._modExp(this._gamma, y0)
 
         const sasb = this._w.map((w: ZqElement) => this._computeFirstMessage(w))
+        console.log({ w: this._w, sasb })
         this.firstMessage = {
             sz: sigmaZ,
             sa: sasb.map((entry: PartialFirstMessage) => entry.sa),
@@ -87,6 +93,7 @@ export class IssuerSession {
     private _computeFirstMessage(w: ZqElement): PartialFirstMessage {
         const sigmaA = this._modExp(this.ip.g[0], w)
         const sigmaB = this._modExp(this._gamma, w)
+        console.log({ sigmaA, sigmaB })
         return { sa: sigmaA, sb: sigmaB }
     }
     private _computeGamma(): GroupElement {
