@@ -94,7 +94,7 @@ class ProverUnitTest {
     initializeAttributes(): Attribute[] {
         const attributes = new Array(this.numAttribs)
         for (let i = 1; i <= this.numAttribs; i++) {
-            attributes[i - 1] = readHexString(vectors['A' + i])
+            attributes[i - 1] = readHexString(this.vectors['A' + i])
         }
         return attributes
     }
