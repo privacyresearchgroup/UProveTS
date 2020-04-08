@@ -33,11 +33,12 @@
 
 /// #endregion JSCop/JsHint
 
+// 'number' of bits per digit. Must be even.
+export const DIGIT_BITS = 24
+// 'number' of bytes per digit.
+export const DIGIT_NUM_BYTES = Math.floor(DIGIT_BITS / 8)
+
 function MsrcryptoMath() {
-  // 'number' of bits per digit. Must be even.
-  var DIGIT_BITS = 24
-  // 'number' of bytes per digit.
-  var DIGIT_NUM_BYTES = Math.floor(DIGIT_BITS / 8)
   // digit mask.
   var DIGIT_MASK = (1 << DIGIT_BITS) - 1
   // digit base.
