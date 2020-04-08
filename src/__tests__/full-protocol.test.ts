@@ -58,8 +58,11 @@ class FullProtocolUnitTest {
         const uidp = readHexString(this._vectors.UIDp)
         const g = this.Group.getPreGenGenerators(this._numAttributes)
 
-        // TODO: use y0!
-        g[0] = readVectorElement(this.Gq, this._vectors, 'g0', this.useECC)
+        const g0base = this.Group.getGenerator()
+        const g0 = this.Gq.getIdentityElement()
+        this.Gq.modexp(g0base, this.y0, g0)
+        g[0] = g0
+        console.log({ g0base: g0base.toByteArrayUnsigned(), g0: g0.toByteArrayUnsigned() })
         const e = new Array(this._numAttributes)
         for (let i = 1; i <= this._numAttributes; i++) {
             if (!g[i].equals(readVectorElement(this.Gq, this._params, 'g' + i, this.useECC))) {
@@ -92,6 +95,7 @@ class FullProtocolUnitTest {
 const protocolTest = new FullProtocolUnitTest(5, params, vectors)
 
 test('run protocol', () => {
+    // Issuer creates the first message
     const firstMsg = protocolTest.issuerSession.getFirstMessage()
     console.log({ firstMsg })
     expect(firstMsg).toBeDefined()
@@ -100,4 +104,35 @@ test('run protocol', () => {
 
     expect(firstMsg.sa[0]).toBeDefined()
     expect(firstMsg.sb[0]).toBeDefined()
+
+    // Prover parses it and creates the second message
+    const proverFirstMsg = protocolTest.prover.ip.ParseFirstMessage(firstMsg)
+    const secondMsg = protocolTest.prover.generateSecondMessage(
+        1,
+        protocolTest.attributes,
+        protocolTest.ti,
+        protocolTest.pi,
+        null,
+        proverFirstMsg,
+        true
+    )
+    console.log({ secondMsg, proverFirstMsg })
+    expect(secondMsg).toBeDefined()
+    expect(secondMsg.sc.length).toEqual(1)
+
+    // Issuer creates third message
+    protocolTest.issuerSession.receiveSecondMessage(secondMsg)
+    const thirdMessage = protocolTest.issuerSession.getThirdMessage()
+
+    console.log({ thirdMessage })
+    expect(thirdMessage).toBeDefined()
+
+    // Prover generates tokens
+    const proverThirdMessage = protocolTest.prover.ip.ParseThirdMessage(thirdMessage)
+    const keyAndToken = protocolTest.prover.generateTokens(proverThirdMessage)
+    console.log({ keyAndToken })
+    expect(keyAndToken).toBeDefined()
+    expect(keyAndToken[0]).toBeDefined()
+    expect(keyAndToken[0].key).toBeDefined()
+    expect(keyAndToken[0].token).toBeDefined()
 })
