@@ -12,7 +12,7 @@ export interface SerializedIssuerParams {
 
 export interface IssuerParamsData {
     uidp: Uint8Array
-    descGq: GroupDescription
+    descGq: DLGroup
     e: number[]
     g: GroupElement[]
     s: Uint8Array
