@@ -1,5 +1,5 @@
 import { Hash } from './hash'
-import { Attribute } from './datatypes'
+import { Attribute, ZqField, ZqElement } from './datatypes'
 
 export function uint8ArrayToBase64(bytes: Uint8Array | number[]): string {
     if (!Array.isArray(bytes)) {
@@ -19,7 +19,7 @@ export function base64ToUint8Array(b64String): Uint8Array {
 }
 
 // Computes a*b+c mod q
-export function ATimesBPlusCModQ(Zq, a, b, c): any {
+export function ATimesBPlusCModQ(Zq: ZqField, a: ZqElement, b: ZqElement, c: ZqElement): ZqElement {
     const result = Zq.createElementFromInteger(0)
     Zq.multiply(a, b, result)
     Zq.add(result, c, result)
