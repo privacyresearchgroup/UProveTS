@@ -7,8 +7,12 @@ export class ZqRNG {
     }
 
     getRandomZqElement(): ZqElement {
-        const bytes = Array(DIGIT_NUM_BYTES).map(() => Math.floor(256 * Math.random()))
-
+        const numBytes = DIGIT_NUM_BYTES * this._Zq.m_digitWidth
+        const bytes = Array(numBytes)
+        for (let i = 0; i < numBytes; ++i) {
+            bytes[i] = Math.floor(256 * Math.random())
+        }
+        console.log(`ZqRNG.getRandomZqElement`, { bytes })
         return this._Zq.createModElementFromBytes(new Uint8Array(bytes))
     }
 }
