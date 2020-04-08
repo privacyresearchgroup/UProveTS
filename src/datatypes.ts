@@ -71,7 +71,7 @@ export interface GroupDescription {
 
 export interface ZqField {
     m_modulus: number[]
-    m_digitWidth: number
+    m_digitWidth: number // length of element in digits
     createElementFromBytes: (bs: Uint8Array | number[]) => ZqElement
     createElementFromDigits: (ds: number[]) => ZqElement
     getIdentityElement: () => ZqElement
