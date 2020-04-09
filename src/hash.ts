@@ -2,7 +2,7 @@ import msrcryptoSha256 from './msrcrypto/sha256'
 import cryptoECC from './msrcrypto/cryptoECC'
 import { HashFunctions, Integer, Point, byte } from './datatypes'
 
-const Uint8ArrayToArray = (uint8Array: Uint8Array) => Array.from(uint8Array)
+const Uint8ArrayToArray = (uint8Array: Uint8Array | number[]) => Array.from(uint8Array)
 
 export class Hash implements HashFunctions {
     sha256: any
@@ -20,7 +20,7 @@ export class Hash implements HashFunctions {
         this.sha256.process(buffer)
     }
 
-    updateBytes(bytes: Uint8Array): void {
+    updateBytes(bytes: Uint8Array | number[]): void {
         this.updateUint32(bytes.length)
         this.sha256.process(Uint8ArrayToArray(bytes))
     }
