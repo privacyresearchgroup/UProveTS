@@ -16,7 +16,7 @@ import {
     ThirdMessage,
     KeyAndToken,
     ScopeData,
-    Proof,
+    SerializedProof,
     IEProof,
     MultiplicativeGroup,
 } from './datatypes'
@@ -249,7 +249,7 @@ export class Prover implements ProverData, ProverFunctions {
         attributes: Attribute[],
         scopeData: ScopeData | null,
         commitmentPrivateValues: any
-    ): Proof {
+    ): SerializedProof {
         if (!keyAndToken || !keyAndToken.key || !keyAndToken.token) {
             throw new Error('invalid key and token')
         }
@@ -327,6 +327,7 @@ export class Prover implements ProverData, ProverFunctions {
         }
         x[t] = computeXt(this.Zq, this.ip, token.ti) // xt
         const aInput = multiModExp(this.Gq, bases, w)
+
         const hash = new Hash()
         hash.updateBytes(aInput.toByteArrayUnsigned())
         const a = hash.digest()
@@ -365,6 +366,7 @@ export class Prover implements ProverData, ProverFunctions {
             m,
             md
         )
+
         const cNegate = this.Zq.createElementFromInteger(0)
         this.Zq.subtract(this.Zq.createElementFromInteger(0), c, cNegate)
 
@@ -400,7 +402,7 @@ export class Prover implements ProverData, ProverFunctions {
             }
         }
 
-        const proof: Proof = {
+        const proof: SerializedProof = {
             D: disclosedA,
             a: uint8ArrayToBase64(a),
             r,
