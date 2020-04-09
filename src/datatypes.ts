@@ -16,6 +16,7 @@ export interface IssuerParamsData {
     e: number[]
     g: GroupElement[]
     s: Uint8Array
+    readonly t: number
 }
 
 export interface IssuerParamsFunctions {
@@ -181,7 +182,7 @@ export interface ScopeData {
     gs: any
 }
 
-export interface Proof {
+export interface SerializedProof {
     D: base64string[]
     a: base64string
     r: base64string[]
@@ -190,6 +191,18 @@ export interface Proof {
     tc?: base64string[]
     ta?: base64string[]
     tr?: base64string[]
+}
+
+export type Digest = Uint8Array
+export interface Proof {
+    D: Attribute[]
+    a: Digest
+    r: ZqElement[]
+    ap?: Digest
+    Ps?: GroupElement
+    tc?: GroupElement[]
+    ta?: Digest[]
+    tr?: ZqElement[]
 }
 
 export interface IEProof {
@@ -229,7 +242,7 @@ export interface ProverFunctions {
         attributes: Attribute[],
         scopeData: ScopeData | null,
         commitmentPrivateValues: any
-    ) => Proof
+    ) => SerializedProof
     verifiableEncrypt: (
         escrowParams: any,
         escrowPublicKey: any,
@@ -251,7 +264,7 @@ export type Point = any // TODO: define this. EC point
 export interface HashFunctions {
     updateByte: (b: byte) => void
     updateUint32: (size: number) => void
-    updateBytes: (bs: Uint8Array) => void
+    updateBytes: (bs: Uint8Array | number[]) => void
     updateRawBytes: (bs: Uint8Array) => void
     updateNull: () => void
     updateListOfBytes: (list: byte[]) => void
