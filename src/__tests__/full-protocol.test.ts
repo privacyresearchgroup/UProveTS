@@ -1,12 +1,20 @@
-import { Attribute, DLGroup, MultiplicativeGroup, ZqField, ZqElement } from '../datatypes'
+import { Attribute, DLGroup, MultiplicativeGroup, ZqField, ZqElement, SerializedUProveToken } from '../datatypes'
 import { IssuerParams } from '../issuerparams'
 import { Prover } from '../prover'
 import ECP256 from '../EcP256'
 import L2048N256 from '../SubgroupL2048N256'
-import { readHexString, readVectorElement, readFileDataInDictionary } from '../testutilities/utilities'
+import {
+    readHexString,
+    readVectorElement,
+    readFileDataInDictionary,
+    readNumberList,
+    performanceTimer,
+} from '../testutilities/utilities'
 import { IssuerSession } from '../issuer'
 import { ZqRNG } from '../testutilities/ZqRNG'
 import { InMemoryPrivateKeyContainer } from '../PrivateKeyContainer'
+import { uint8ArrayToBase64 } from '../utilities'
+import { Verifier } from '../verifier'
 
 let totalTime: number
 totalTime = 0
@@ -129,10 +137,52 @@ test('run protocol', () => {
 
     // Prover generates tokens
     const proverThirdMessage = protocolTest.prover.ip.ParseThirdMessage(thirdMessage)
-    const keyAndToken = protocolTest.prover.generateTokens(proverThirdMessage)
-    console.log({ keyAndToken })
-    expect(keyAndToken).toBeDefined()
-    expect(keyAndToken[0]).toBeDefined()
-    expect(keyAndToken[0].key).toBeDefined()
-    expect(keyAndToken[0].token).toBeDefined()
+    const keyAndBaseToken = protocolTest.prover.generateTokens(proverThirdMessage)
+    console.log({ keyAndToken: keyAndBaseToken })
+    expect(keyAndBaseToken).toBeDefined()
+    expect(keyAndBaseToken[0]).toBeDefined()
+    expect(keyAndBaseToken[0].key).toBeDefined()
+    expect(keyAndBaseToken[0].token).toBeDefined()
+
+    // Prover generates proof
+
+    const token: SerializedUProveToken = {
+        ...keyAndBaseToken[0].token,
+        uidp: uint8ArrayToBase64(protocolTest.ip.uidp),
+        ti: uint8ArrayToBase64(protocolTest.ti),
+        pi: uint8ArrayToBase64(protocolTest.pi),
+    }
+    const { key } = keyAndBaseToken[0]
+
+    const disclosed = readNumberList(vectors.D)
+    const committed = null
+    const undisclosed = readNumberList(vectors.U)
+    const message = readHexString(vectors.m)
+    const messageD = readHexString(vectors.md)
+    const scopeData = null
+    const commitmentPrivateValues = {}
+    const t1 = performanceTimer.now()
+    const ukat = protocolTest.ip.ParseKeyAndToken({ key, token })
+
+    const proof = protocolTest.prover.generateProof(
+        ukat,
+        disclosed,
+        committed || [],
+        message,
+        messageD,
+        protocolTest.attributes,
+        scopeData,
+        commitmentPrivateValues
+    )
+    const time = performanceTimer.now() - t1
+    console.log(`generate proof time: ${time}`)
+
+    expect(proof).toBeDefined()
+
+    const verifier = new Verifier(protocolTest.ip)
+    const parsedProof = verifier.parseProof(proof)
+
+    const isValid = verifier.verify(parsedProof, ukat.token, disclosed, [], message, messageD)
+    console.log(isValid)
+    expect(isValid).toBe(true)
 })
