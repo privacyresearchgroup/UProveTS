@@ -1,5 +1,5 @@
 import { Hash } from './hash'
-import { Attribute, ZqField, ZqElement } from './datatypes'
+import { Attribute, ZqField, ZqElement, UProveToken } from './datatypes'
 
 export function uint8ArrayToBase64(bytes: Uint8Array | number[]): string {
     if (!Array.isArray(bytes)) {
@@ -79,7 +79,7 @@ export function computeXt(Zq, ip, ti): any {
     return Zq.createModElementFromBytes(H.digest())
 }
 
-export function computeTokenId(token): Uint8Array {
+export function computeTokenId(token: UProveToken): Uint8Array {
     const hash = new Hash()
     hash.updateBytes(token.h.toByteArrayUnsigned())
     hash.updateBytes(token.szp.toByteArrayUnsigned())
