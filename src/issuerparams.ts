@@ -36,6 +36,10 @@ export class IssuerParams implements IssuerParamsData, IssuerParamsFunctions {
         return true
     }
 
+    get t(): number {
+        return this.e.length + 1
+    }
+
     computeDigest(): Uint8Array {
         if (this.P === undefined) {
             const H = new Hash()
