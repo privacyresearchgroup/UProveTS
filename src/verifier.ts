@@ -53,7 +53,50 @@ export class Verifier {
     }
 
     verifyTokenSignature(token: UProveToken): boolean {
-        return false
+        const g = this.ip.descGq.getGenerator()
+        const g0 = this.ip.g[0]
+        const { h, srp, scp, szp } = token
+
+        const minusScp = this.Zq.createElementFromInteger(0)
+        this.Zq.subtract(this.Zq.createElementFromInteger(0), scp, minusScp)
+
+        // compute sigmaA prime
+        const gToSrp = this.Gq.getIdentityElement()
+        this.Gq.modexp(g, srp, gToSrp)
+
+        const g0ToMinusScp = this.Gq.getIdentityElement()
+        this.Gq.modexp(g0, minusScp, g0ToMinusScp)
+
+        const verifierSap = this.Gq.getIdentityElement()
+        this.Gq.multiply(gToSrp, g0ToMinusScp, verifierSap)
+
+        // compute sigmaB prime
+        const szpToMinusScp = this.Gq.getIdentityElement()
+        this.Gq.modexp(szp, minusScp, szpToMinusScp)
+
+        const hToSrp = this.Gq.getIdentityElement()
+        this.Gq.modexp(h, srp, hToSrp)
+
+        const verifierSbp = this.Gq.getIdentityElement()
+        this.Gq.multiply(hToSrp, szpToMinusScp, verifierSbp)
+
+        // console.log({
+        //     verifierSap: verifierSap.toByteArrayUnsigned(),
+        //     verifierSbp: verifierSbp.toByteArrayUnsigned(),
+        //     szp: szp.toByteArrayUnsigned(),
+        //     scp: scp.toByteArrayUnsigned(),
+        // })
+
+        const hash = new Hash()
+        hash.updateBytes(h.toByteArrayUnsigned())
+        hash.updateBytes(token.pi!)
+        hash.updateBytes(szp.toByteArrayUnsigned())
+        hash.updateBytes(verifierSap.toByteArrayUnsigned())
+        hash.updateBytes(verifierSbp.toByteArrayUnsigned())
+        const dig = hash.digest()
+        const shouldBeScp = this.Zq.createElementFromBytes(dig)
+        console.log({ scp: scp.m_digits, shouldBeScp: shouldBeScp.m_digits, dig })
+        return scp.equals(shouldBeScp)
     }
 
     /***
