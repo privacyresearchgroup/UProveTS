@@ -90,7 +90,8 @@ export class IssuerSession {
     }
 
     private _computeFirstMessage(w: ZqElement): PartialFirstMessage {
-        const sigmaA = this._modExp(this.ip.g[0], w)
+        const g = this.ip.descGq.getGenerator()
+        const sigmaA = this._modExp(g, w)
         const sigmaB = this._modExp(this._gamma, w)
         return { sa: sigmaA, sb: sigmaB }
     }
