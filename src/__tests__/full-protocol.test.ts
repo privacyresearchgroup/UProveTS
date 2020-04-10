@@ -180,6 +180,8 @@ test('run protocol', () => {
     expect(proof).toBeDefined()
 
     const verifier = new Verifier(protocolTest.ip)
+    expect(verifier.verifyTokenSignature(ukat.token)).toBe(true)
+
     const parsedProof = verifier.parseProof(proof)
 
     const isValid = verifier.verify(parsedProof, ukat.token, disclosed, [], message, messageD)
