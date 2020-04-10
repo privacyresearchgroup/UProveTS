@@ -12,7 +12,6 @@ export class ZqRNG {
         for (let i = 0; i < numBytes; ++i) {
             bytes[i] = Math.floor(256 * Math.random())
         }
-        console.log(`ZqRNG.getRandomZqElement`, { bytes })
         return this._Zq.createModElementFromBytes(new Uint8Array(bytes))
     }
 }
