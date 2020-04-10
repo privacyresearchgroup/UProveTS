@@ -43,7 +43,7 @@ export interface GroupElement {
 export interface ZqElement {
     m_digits: number[]
     m_group: Zq
-    equals: (g: GroupElement) => boolean
+    equals: (g: ZqElement) => boolean
     toByteArrayUnsigned: () => number[]
 }
 
