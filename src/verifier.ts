@@ -105,7 +105,6 @@ export class Verifier {
         hash.updateBytes(verifierSbp.toByteArrayUnsigned())
         const dig = hash.digest()
         const shouldBeScp = this.Zq.createElementFromBytes(dig)
-        console.log({ scp: scp.m_digits, shouldBeScp: shouldBeScp.m_digits, dig })
         return scp.equals(shouldBeScp)
     }
 
@@ -149,7 +148,6 @@ export class Verifier {
         uBases.unshift(token.h)
         const uPart = multiModExp(this.Gq, uBases, proof.r)
 
-        console.log({ D, U })
         const dBases = D.map((d: number) => this.ip.g[d])
         const dPart = multiModExp(this.Gq, dBases, disclosedX)
 
@@ -171,8 +169,6 @@ export class Verifier {
         })
         hash.updateBytes(aInput.toByteArrayUnsigned())
         const shouldBeA = hash.digest()
-
-        console.log({ a: proof.a, shouldBeA })
 
         return cryptoMath.sequenceEqual(proof.a, shouldBeA)
     }

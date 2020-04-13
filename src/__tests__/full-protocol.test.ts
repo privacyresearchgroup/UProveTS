@@ -88,7 +88,6 @@ class FullProtocolUnitTest {
         const g0 = this.Gq.getIdentityElement()
         this.Gq.modexp(g0base, this.y0, g0)
         g[0] = g0
-        console.log({ g0base: g0base.toByteArrayUnsigned(), g0: g0.toByteArrayUnsigned() })
         const e = new Array(this._numAttributes)
         for (let i = 1; i <= this._numAttributes; i++) {
             if (!g[i].equals(readVectorElement(this.Gq, this._params, 'g' + i, this.useECC))) {
@@ -123,7 +122,6 @@ const protocolTest = new FullProtocolUnitTest(5, params, vectors)
 test('run protocol', () => {
     // Issuer creates the first message
     const firstMsg = protocolTest.issuerSession.getFirstMessage()
-    console.log({ firstMsg })
     expect(firstMsg).toBeDefined()
     expect(firstMsg.sa.length).toEqual(1)
     expect(firstMsg.sb.length).toEqual(1)
@@ -142,7 +140,6 @@ test('run protocol', () => {
         proverFirstMsg,
         true
     )
-    console.log({ secondMsg, proverFirstMsg })
     expect(secondMsg).toBeDefined()
     expect(secondMsg.sc.length).toEqual(1)
 
@@ -150,7 +147,6 @@ test('run protocol', () => {
     protocolTest.issuerSession.receiveSecondMessage(secondMsg)
     const thirdMessage = protocolTest.issuerSession.getThirdMessage()
 
-    console.log({ thirdMessage })
     expect(thirdMessage).toBeDefined()
 
     // Prover generates tokens
