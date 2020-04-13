@@ -10,7 +10,13 @@
   "scripts": {
     "test": "jest --config jestconfig.json",
     "lint": "tslint -c tslint.json -p tsconfig.json -e 'node_modules/**' -e 'typings/**' '**/*.ts?(x)'",
-    "format": "prettier '**/{*.{js?(on),ts?(x),md},.*.js?(on)}' --write --list-different --config prettier.config.js"
+    "format": "prettier '**/{*.{js?(on),ts?(x),md},.*.js?(on)}' --write --list-different --config prettier.config.js",
+    "prepare": "yarn run build",
+    "build": "tsc -d",
+    "prepublishOnly": "yarn test && yarn run lint",
+    "preversion": "yarn run lint && yarn test",
+    "version": "yarn run format && git add -A src",
+    "postversion": "git push && git push --tags"
   },
   "devDependencies": {
     "@types/jest": "^25.1.4",
