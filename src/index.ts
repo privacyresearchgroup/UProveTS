@@ -16,15 +16,19 @@
  *    limitations under the License.
  */
 
-import msrcrypto from 'msrcrypto'
+export * from './datatypes'
+export { Hash } from './hash'
+export { IssuerParams } from './issuerparams'
+export { IssuerSession } from './issuer'
+export * from './PrivateKeyContainer'
+export { Prover } from './prover'
+export { Verifier } from './verifier'
 
-export function sum(a: number, b: number): number {
-    return a + b
-}
+// TODO: do we need to export the utilities? If so we should decide which ones
+// and split it into an exported file and a non-exported file.
+export { uint8ArrayToBase64 } from './utilities'
 
-export class Hash {
-    sha256: any
-    constructor() {
-        this.sha256 = msrcrypto
-    }
-}
+import * as ECP256 from './EcP256'
+import * as L2048N256 from './SubgroupL2048N256'
+export { ECP256 }
+export { L2048N256 }
