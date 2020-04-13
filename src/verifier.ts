@@ -27,15 +27,7 @@ import {
     ZqElement,
     UProveToken,
 } from './datatypes'
-import {
-    base64ToUint8Array,
-    base64ToArray,
-    computeTokenId,
-    generateChallenge,
-    computeX,
-    multiModExp,
-    computeXt,
-} from './utilities'
+import { base64ToUint8Array, base64ToArray, generateChallenge, computeX, multiModExp, computeXt } from './utilities'
 import { Hash } from './hash'
 import cryptoMath from './msrcrypto/cryptoMath'
 
