@@ -1,6 +1,7 @@
 ﻿// *********************************************************
 //
-//    Copyright (c) Microsoft. All rights reserved.
+//    Original file: Copyright (c) Microsoft. All rights reserved.
+//    Modifications for TypeScript conversion: Copyright (c) Privacy Research, LLC
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
