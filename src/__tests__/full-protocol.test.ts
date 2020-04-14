@@ -200,5 +200,7 @@ test('run protocol', () => {
 
     const isValid = verifier.verify(parsedProof, ukat.token, disclosed, [], message, messageD)
     console.log(isValid)
+    console.log(protocolTest.ip.serialize())
+    console.log(uint8ArrayToBase64(protocolTest.y0.toByteArrayUnsigned()))
     expect(isValid).toBe(true)
 })

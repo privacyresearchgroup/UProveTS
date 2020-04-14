@@ -32,6 +32,8 @@ import {
     ThirdMessage,
     SerializedSecondMessage,
     SerializedThirdMessage,
+    SerializedIssuerParams,
+    base64string,
 } from './datatypes'
 import {
     computeXArray,
@@ -46,6 +48,17 @@ import { PrivateKeyContainer } from './PrivateKeyContainer'
 interface PartialFirstMessage {
     sa: GroupElement
     sb: GroupElement
+}
+
+export interface SerializedIssuerSession {
+    ip: SerializedIssuerParams
+    ti: base64string
+    w: base64string[]
+    attributes: Attribute[]
+    numTokens: number
+    firstMessage?: SerializedFirstMessage
+    secondMessage?: SerializedSecondMessage
+    thirdMessage?: SerializedThirdMessage
 }
 export class IssuerSession {
     ip: IssuerParams
@@ -68,11 +81,14 @@ export class IssuerSession {
         rng: RandomNumberGenerator,
         ip: IssuerParamsData & IssuerParamsFunctions,
         attributes: Attribute[],
-        ti: Uint8Array
+        ti: Uint8Array,
+        firstMessage?: FirstMessage,
+        secondMessage?: SecondMessage,
+        thirdMessage?: ThirdMessage
     ) {
         this.ip = ip
-        this._w = Array(_numTokens)
-        for (let i = 0; i < _numTokens; ++i) {
+        this._w = Array(this._numTokens)
+        for (let i = 0; i < this._numTokens; ++i) {
             this._w[i] = rng.getRandomZqElement()
         }
         this.Gq = ip.descGq.getGq()
@@ -82,6 +98,14 @@ export class IssuerSession {
 
         console.log(`this._w`, this._w)
         this._gamma = this._computeGamma()
+
+        this.firstMessage = firstMessage
+        this.secondMessage = secondMessage
+        this.thirdMessage = thirdMessage
+    }
+
+    setW(w: ZqElement[]): void {
+        this._w = w
     }
 
     private _prepareFirstMessages(): void {
@@ -154,5 +178,24 @@ export class IssuerSession {
         return {
             sr: this.thirdMessage!.sr.map((sr: ZqElement) => uint8ArrayToBase64(sr.toByteArrayUnsigned())),
         }
+    }
+
+    static loadIssuerSession(
+        ser: SerializedIssuerSession,
+        pkc: PrivateKeyContainer,
+        w: ZqElement[],
+        rng: RandomNumberGenerator
+    ): IssuerSession {
+        const ip = IssuerParams.ParseIssuerParams(ser.ip)
+        const Zq = ip.descGq.getZq()
+        const ti = base64ToUint8Array(ser.ti)
+        const fm = ser.firstMessage && ip.ParseFirstMessage(ser.firstMessage)
+        const sm = ser.secondMessage && {
+            sc: ser.secondMessage.sc.map((b64: string) => Zq.createElementFromBytes(base64ToUint8Array(b64))),
+        }
+        const tm = ser.thirdMessage && ip.ParseThirdMessage(ser.thirdMessage)
+        const is = new IssuerSession(pkc, ser.numTokens, rng, ip, ser.attributes, ti, fm, sm, tm)
+        is.setW(w)
+        return is
     }
 }

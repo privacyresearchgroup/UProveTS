@@ -35,7 +35,7 @@ import {
     SerializedIssuerParams,
 } from './datatypes'
 import { Hash } from './hash'
-import { base64ToUint8Array, base64ToArray } from './utilities'
+import { base64ToUint8Array, base64ToArray, uint8ArrayToBase64 } from './utilities'
 import L2048N256 from './SubgroupL2048N256'
 import ECP256 from './EcP256'
 
@@ -149,6 +149,16 @@ export class IssuerParams implements IssuerParamsData, IssuerParamsFunctions {
         } catch (e) {
             throw new Error(`can't parse key and token: ${e}`)
         }
+    }
+
+    serialize(): SerializedIssuerParams {
+        const uidp = uint8ArrayToBase64(this.uidp)
+        const descGq = { name: this.descGq.OID }
+        const e = uint8ArrayToBase64(this.e)
+        const g = this.g.map((g) => uint8ArrayToBase64(g.toByteArrayUnsigned()))
+        const s = uint8ArrayToBase64(this.s)
+
+        return { uidp, descGq, e, g, s }
     }
 
     static ParseIssuerParams(ipObj: SerializedIssuerParams): IssuerParams {

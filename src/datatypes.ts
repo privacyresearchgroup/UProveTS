@@ -43,10 +43,11 @@ export interface IssuerParamsFunctions {
     ParseFirstMessage: (fmObj: SerializedFirstMessage) => FirstMessage
     ParseThirdMessage: (fmObj: SerializedThirdMessage) => ThirdMessage
     ParseKeyAndToken: (ukatObj: SerializedKeyAndToken) => KeyAndToken
+    serialize: () => SerializedIssuerParams
 }
 
 export interface SerializedGroupDescription {
-    name: base64string
+    name: string
 }
 
 export type Zq = ZqField
@@ -73,6 +74,7 @@ export interface MultiplicativeGroup {
 }
 
 export interface DLGroup {
+    OID: string
     getGq: () => MultiplicativeGroup
     getZq: () => ZqField
     updateHash: (h: HashFunctions) => void
