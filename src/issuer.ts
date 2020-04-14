@@ -53,7 +53,6 @@ interface PartialFirstMessage {
 export interface SerializedIssuerSession {
     ip: SerializedIssuerParams
     ti: base64string
-    w: base64string[]
     attributes: Attribute[]
     numTokens: number
     firstMessage?: SerializedFirstMessage
@@ -155,10 +154,7 @@ export class IssuerSession {
         return ATimesBPlusCModQ(this.Zq, sigmaC, y0, w)
     }
 
-    getFirstMessage(): SerializedFirstMessage {
-        if (!this.firstMessage) {
-            this._prepareFirstMessages()
-        }
+    _serializeFirstMessage(): SerializedFirstMessage {
         return {
             sz: uint8ArrayToBase64(this.firstMessage!.sz.toByteArrayUnsigned()),
             sa: this.firstMessage!.sa.map((sa: GroupElement) => uint8ArrayToBase64(sa.toByteArrayUnsigned())),
@@ -166,18 +162,58 @@ export class IssuerSession {
         }
     }
 
+    getFirstMessage(): SerializedFirstMessage {
+        if (!this.firstMessage) {
+            this._prepareFirstMessages()
+        }
+        return this._serializeFirstMessage()
+    }
+
     receiveSecondMessage(secondMsg: SerializedSecondMessage): void {
         const sc = secondMsg.sc.map((b64: string) => this.Zq.createElementFromBytes(base64ToUint8Array(b64)))
         this.secondMessage = { sc }
+    }
+
+    _serializeSecondMessage(): SerializedSecondMessage {
+        const sc = this.secondMessage!.sc.map((n: ZqElement) => uint8ArrayToBase64(n.toByteArrayUnsigned()))
+        return sc && { sc }
     }
 
     getThirdMessage(): SerializedThirdMessage {
         if (!this.thirdMessage) {
             this._prepareThirdMessage()
         }
+        return this._serializeThirdMessage()
+    }
+
+    _serializeThirdMessage(): SerializedThirdMessage {
         return {
             sr: this.thirdMessage!.sr.map((sr: ZqElement) => uint8ArrayToBase64(sr.toByteArrayUnsigned())),
         }
+    }
+
+    serialize(): SerializedIssuerSession {
+        const ip = this.ip.serialize()
+        const ti = uint8ArrayToBase64(this.ti)
+        const { attributes } = this
+        const numTokens = this._numTokens
+        const firstMessage = this.firstMessage && this._serializeFirstMessage()
+        const secondMessage = this.secondMessage && this._serializeSecondMessage()
+        const thirdMessage = this.thirdMessage && this._serializeThirdMessage()
+
+        return {
+            ip,
+            ti,
+            attributes,
+            numTokens,
+            firstMessage,
+            secondMessage,
+            thirdMessage,
+        }
+    }
+
+    serializeW(): base64string[] {
+        return this._w.map((w: ZqElement) => uint8ArrayToBase64(w.toByteArrayUnsigned()))
     }
 
     static loadIssuerSession(
