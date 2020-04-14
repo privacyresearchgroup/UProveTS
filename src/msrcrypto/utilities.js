@@ -30,6 +30,7 @@
 
 /// #endregion JSCop/JsHint
 import atob from 'atob'
+import btoa from 'btoa'
 
 const msrcryptoUtilities = (function () {
   var encodingChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
