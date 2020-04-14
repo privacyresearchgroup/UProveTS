@@ -155,7 +155,7 @@ export class IssuerParams implements IssuerParamsData, IssuerParamsFunctions {
         const uidp = uint8ArrayToBase64(this.uidp)
         const descGq = { name: this.descGq.OID }
         const e = uint8ArrayToBase64(this.e)
-        const g = this.g.map((g) => uint8ArrayToBase64(g.toByteArrayUnsigned()))
+        const g = this.g.map((g: GroupElement) => uint8ArrayToBase64(g.toByteArrayUnsigned()))
         const s = uint8ArrayToBase64(this.s)
 
         return { uidp, descGq, e, g, s }
