@@ -23,6 +23,7 @@ and addition of type information.
 
 import { Hash } from './hash'
 import { Attribute, ZqField, ZqElement, UProveToken } from './datatypes'
+import atob from 'atob'
 
 export function uint8ArrayToBase64(bytes: Uint8Array | number[]): string {
     if (!Array.isArray(bytes)) {

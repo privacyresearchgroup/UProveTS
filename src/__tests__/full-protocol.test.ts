@@ -202,5 +202,6 @@ test('run protocol', () => {
     console.log(isValid)
     console.log(protocolTest.ip.serialize())
     console.log(uint8ArrayToBase64(protocolTest.y0.toByteArrayUnsigned()))
+    console.log(protocolTest.issuerSession.serialize())
     expect(isValid).toBe(true)
 })
