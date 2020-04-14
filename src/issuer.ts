@@ -44,6 +44,7 @@ import {
     ATimesBPlusCModQ,
 } from './utilities'
 import { PrivateKeyContainer } from './PrivateKeyContainer'
+import { ZqRNG } from './testutilities/ZqRNG'
 
 interface PartialFirstMessage {
     sa: GroupElement
@@ -219,11 +220,13 @@ export class IssuerSession {
     static loadIssuerSession(
         ser: SerializedIssuerSession,
         pkc: PrivateKeyContainer,
-        w: ZqElement[],
-        rng: RandomNumberGenerator
+        w: base64string[],
+        rng?: RandomNumberGenerator
     ): IssuerSession {
         const ip = IssuerParams.ParseIssuerParams(ser.ip)
         const Zq = ip.descGq.getZq()
+        const ws = w.map((b64: string) => Zq.createElementFromBytes(base64ToUint8Array(b64)))
+        rng = rng || new ZqRNG(Zq)
         const ti = base64ToUint8Array(ser.ti)
         const fm = ser.firstMessage && ip.ParseFirstMessage(ser.firstMessage)
         const sm = ser.secondMessage && {
@@ -231,7 +234,7 @@ export class IssuerSession {
         }
         const tm = ser.thirdMessage && ip.ParseThirdMessage(ser.thirdMessage)
         const is = new IssuerSession(pkc, ser.numTokens, rng, ip, ser.attributes, ti, fm, sm, tm)
-        is.setW(w)
+        is.setW(ws)
         return is
     }
 }
