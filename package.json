@@ -1,6 +1,6 @@
 {
   "name": "@rolfe/uprovets",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "TypeScript library for the UProve anonymous credential system",
   "main": "index.js",
   "repository": "https://github.com/rolfeschmidt/UProveTS.git",
@@ -33,6 +33,9 @@
     "lodash": "^4.17.15"
   },
   "files": [
-    "lib/**/*"
+    "lib/*.js",
+    "lib/*.d.ts",
+    "lib/msrcrypto/**/*",
+    "lib/testutilities/**/*"
   ]
 }
