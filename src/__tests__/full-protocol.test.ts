@@ -152,7 +152,7 @@ test('run protocol', () => {
     // Prover generates tokens
     const proverThirdMessage = protocolTest.prover.ip.ParseThirdMessage(thirdMessage)
     const keyAndBaseToken = protocolTest.prover.generateTokens(proverThirdMessage)
-    console.log({ keyAndToken: keyAndBaseToken })
+    // console.log({ keyAndToken: keyAndBaseToken })
     expect(keyAndBaseToken).toBeDefined()
     expect(keyAndBaseToken[0]).toBeDefined()
     expect(keyAndBaseToken[0].key).toBeDefined()
@@ -189,7 +189,7 @@ test('run protocol', () => {
         commitmentPrivateValues
     )
     const time = performanceTimer.now() - t1
-    console.log(`generate proof time: ${time}`)
+    // console.log(`generate proof time: ${time}`)
 
     expect(proof).toBeDefined()
 
@@ -199,9 +199,9 @@ test('run protocol', () => {
     const parsedProof = verifier.parseProof(proof)
 
     const isValid = verifier.verify(parsedProof, ukat.token, disclosed, [], message, messageD)
-    console.log(isValid)
-    console.log(protocolTest.ip.serialize())
-    console.log(uint8ArrayToBase64(protocolTest.y0.toByteArrayUnsigned()))
-    console.log(protocolTest.issuerSession.serialize())
+    // console.log(isValid)
+    // console.log(protocolTest.ip.serialize())
+    // console.log(uint8ArrayToBase64(protocolTest.y0.toByteArrayUnsigned()))
+    // console.log(protocolTest.issuerSession.serialize())
     expect(isValid).toBe(true)
 })
