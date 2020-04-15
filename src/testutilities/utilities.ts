@@ -62,7 +62,8 @@ function readFileData(filename: string): string {
 export function readFileDataInDictionary(filename: string): { [k: string]: any } {
     const fileData = readFileData(filename)
 
-    const lines = fileData.split('\r\n')
+    const lines = fileData.split(/\r\n|\r|\n/)
+    console.log({ filename, numLines: lines.length })
     const dictionary = {}
     for (let j = 1; j < lines.length; j++) {
         // skip the file header in line 0
@@ -72,24 +73,11 @@ export function readFileDataInDictionary(filename: string): { [k: string]: any }
     return dictionary
 }
 
-export function readTestVectors(filename: string): { [k: string]: any } {
-    const vectorsData = readFileData(filename)
-    // put each test vector variable in a dictionary
-    const lines = vectorsData.split('\r\n')
-    const vectors = {}
-    for (let j = 1; j < lines.length; j++) {
-        // skip the header
-        const lineData = lines[j].split(' = ')
-        vectors[lineData[0]] = lineData[1]
-    }
-    return vectors
-}
-
 export function readRecommendedParams(filename: string): { [k: string]: any } {
     const paramsData = readFileData(filename)
 
     // put each test vector variable in a dictionary
-    const lines = paramsData.split('\r\n')
+    const lines = paramsData.split(/\r\n|\r|\n/)
     const vectors = {}
     for (let j = 1; j < lines.length; j++) {
         // skip the header
