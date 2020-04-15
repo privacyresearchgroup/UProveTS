@@ -2,3 +2,5 @@ node_modules/
 lib/
 
 yarn-error.log
+
+src/__tests__/TestVectors/apidata.txt
