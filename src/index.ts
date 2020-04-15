@@ -32,3 +32,5 @@ import * as ECP256 from './EcP256'
 import * as L2048N256 from './SubgroupL2048N256'
 export { ECP256 }
 export { L2048N256 }
+
+export * from './AttributeSet'
