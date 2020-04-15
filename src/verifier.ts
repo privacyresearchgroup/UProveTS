@@ -164,9 +164,6 @@ export class Verifier {
         this.Gq.multiply(dPart, uPart, aInput)
 
         const hash = new Hash()
-        console.log(`verifier`, {
-            aInput: aInput.toByteArrayUnsigned(),
-        })
         hash.updateBytes(aInput.toByteArrayUnsigned())
         const shouldBeA = hash.digest()
 

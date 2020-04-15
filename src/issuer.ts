@@ -96,7 +96,6 @@ export class IssuerSession {
         this.attributes = attributes
         this.ti = ti
 
-        console.log(`this._w`, this._w)
         this._gamma = this._computeGamma()
 
         this.firstMessage = firstMessage
