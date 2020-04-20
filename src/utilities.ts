@@ -23,18 +23,18 @@ and addition of type information.
 
 import { Hash } from './hash'
 import { Attribute, ZqField, ZqElement, UProveToken } from './datatypes'
-import btoa from 'btoa'
-import atob from 'atob'
+import btoapf from 'btoa'
+import atobpf from 'atob'
 
 export function uint8ArrayToBase64(bytes: Uint8Array | number[]): string {
     if (!Array.isArray(bytes)) {
         bytes = Array.from(bytes)
     }
-    return btoa(String.fromCharCode.apply(null, bytes))
+    return btoapf(String.fromCharCode.apply(null, bytes))
 }
 
 export function base64ToArray(b64String: string): number[] {
-    return atob(b64String)
+    return atobpf(b64String)
         .split('')
         .map((c: string) => c.charCodeAt(0))
 }
