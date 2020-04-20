@@ -26,6 +26,10 @@ import { Attribute, ZqField, ZqElement, UProveToken } from './datatypes'
 import b2a from 'btoa'
 import a2b from 'atob'
 
+const atobSupport = typeof atob !== 'undefined'
+const a2bfunc = atobSupport ? atob : a2b
+console.log(`atobSupport: ${atobSupport}`)
+
 export function uint8ArrayToBase64(bytes: Uint8Array | number[]): string {
     if (!Array.isArray(bytes)) {
         bytes = Array.from(bytes)
@@ -34,8 +38,7 @@ export function uint8ArrayToBase64(bytes: Uint8Array | number[]): string {
 }
 
 export function base64ToArray(b64String: string): number[] {
-    return (a2b as any)
-        .atob(b64String)
+    return a2bfunc(b64String)
         .split('')
         .map((c: string) => c.charCodeAt(0))
 }

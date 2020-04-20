@@ -31,6 +31,10 @@
 /// #endregion JSCop/JsHint
 import a2b from 'atob'
 
+const atobSupport = typeof atob !== 'undefined'
+const a2bfunc = atobSupport ? atob : a2b
+console.log(`atobSupport: ${atobSupport}`)
+
 const msrcryptoUtilities = (function () {
   var encodingChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 
@@ -117,7 +121,7 @@ const msrcryptoUtilities = (function () {
         encodedString += '='
       }
 
-      return a2b.atob(encodedString)
+      return a2bfunc(encodedString)
     }
 
     return String.fromCharCode.apply(null, base64ToBytes(encodedString))
