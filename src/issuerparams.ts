@@ -183,6 +183,7 @@ export class IssuerParams implements IssuerParamsData, IssuerParamsFunctions {
             const s = base64ToUint8Array(ipObj.s)
             return new IssuerParams(uidp, descGq, g, e, s)
         } catch (e) {
+            console.error(e)
             throw new Error(`can't parse issuer parameters: ${e}`)
         }
     }
