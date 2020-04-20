@@ -29,8 +29,7 @@
 /// </dictionary>
 
 /// #endregion JSCop/JsHint
-import atob from 'atob'
-import btoa from 'btoa'
+import a2b from 'atob'
 
 const msrcryptoUtilities = (function () {
   var encodingChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
@@ -118,7 +117,7 @@ const msrcryptoUtilities = (function () {
         encodedString += '='
       }
 
-      return atob(encodedString)
+      return a2b.atob(encodedString)
     }
 
     return String.fromCharCode.apply(null, base64ToBytes(encodedString))
