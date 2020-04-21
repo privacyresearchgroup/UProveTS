@@ -2,6 +2,16 @@
 This is a TypeScript SDK meant to allow developers to experiment with the [U-Prove](https://www.microsoft.com/en-us/research/project/u-prove/) anonymous credential system in web, mobile, and
 backend appliations.  The mathematical core of this library is a direct port of Microsoft Research's [U-Prove Javascript SDK](https://www.microsoft.com/en-us/download/details.aspx?id=52491). 
 
+## Anonymous Credential Systems
+The U-Prove protocol is an anonymous credential system.  It allows a user who we'll call a _prover_ to interact with an _issuer_ to create cryptographic tokens with a set of attributes signed by the issuer.  Once might think of the issuer being a government issuing a passport, the user is the person getting the digital passport, and the attributes are all of the attributes of the user on the passport: name, birthdate, address, etc.
+
+Once these tokens are created the user can use them to create a _presentation proof_ where he shows that he has a valid token (e.g. he has an authentic digital passport) and that certain facts are true about the attributes (e.g. "my name is Bob", "I am over 18 years old", "My photo hash is ...").
+
+This SDK makes it easy to implement all of these roles.  We also have example implementations including:
+* An AWS serverless issuer API
+* A React Native mobile app that acts as a prover in an anonymous-credential based login system
+* A React web app that acts as a verifier, receiving presentation proofs from the mobile app and using them as login and ID tokens, similar to how it might use an OIDC token.
+
 ## Differences from the Microsoft Research SDK
 Significant changes include:
 * Reorganization of code
