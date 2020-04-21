@@ -7,6 +7,12 @@ The U-Prove protocol is an anonymous credential system.  It allows a user who we
 
 Once these tokens are created the user can use them to create a _presentation proof_ where he shows that he has a valid token (e.g. he has an authentic digital passport) and that certain facts are true about the attributes (e.g. "my name is Bob", "I am over 18 years old", "My photo hash is ...").
 
+Putting these together, here's the sort of story we'd like to be able to tell:
+* You visit your passport office, get a picture, verify your information, and then interact with them in an _issuance protocol_ to get a digital passport on your mobile phone.
+* When asked for identification, the requestor can ask for certain bits of information: can I see your picture, name, state of residence, and a proof that your age is between 18 and 65?
+* Your prover app can then provide a token from the issuer along with _provably correct_ answers to those questions.
+* Meanwhile, the issuer does not need to be involved in this process and knows nothing about who you are interacting with.
+
 This SDK makes it easy to implement all of these roles.  We also have example implementations including:
 * An AWS serverless issuer API
 * A React Native mobile app that acts as a prover in an anonymous-credential based login system
