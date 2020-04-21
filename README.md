@@ -21,6 +21,76 @@ yarn install @rolfe/uprovets
 ```
 For detailed example usage, look at [`__tests__/full-protocol.ts`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/__tests__/full-protocol.test.ts) and[`__tests__/integration-test.ts`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/__tests__/integration.test.ts).  To execute and run the integration tests you will need to deploy an issuing server. A sample issuer is available [here](https://github.com/rolfeschmidt/uproveissuer).
 
+### Key Components
+All users of the U-Prove system will need access to the issuer's public parameters.  These are captured in the [`IssuerParams`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/issuerparams.ts) class which will typically be instantiated as follows
+```
+// The serialized issuer parameters will be obtained from a public registry or directly from the issuer
+const serializedIssuerParams = {...}
+
+const ip = IssuerParams.ParseIssuerParams(serializedIssuerParams)
+```
+An [`IssuerSession`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/issuer.ts) is used when implementing an issuer to take part in the U-Prove protocol.  Creating an `IssuerSession` requires a `PrivateKeyContainer` which you will provide.  Look at our [sample issuer web service](https://github.com/rolfeschmidt/uproveissuer) for a detailed example.
+
+A [`Prover`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/prover.ts) performs the functions of a prover in the U-Prove protocol - sending messages to and receiving messages from the issuer, generating tokens, and generating attribute presentation proofs. Here is an example, adapted from the unit tests, of a prover interacting with an issuer to generate tokens
+```
+
+    // Pseudocode - you will need to connect with your issuer and manage communication
+    const firstMsg = issuerAPISession.getFirstMessage()
+
+    // Prover parses it and creates the second message
+    const proverFirstMsg = prover.ip.ParseFirstMessage(firstMsg)
+    const secondMsg = prover.generateSecondMessage(
+        1, // only generating one token
+        attributes, // an array of arrays of numbers - use AttributeSet to encode typed data
+        ti, // token information
+        pi, // prover information, not seen by issuer
+        null, // "external gamma" - this is a relic of the MSR SDK.  We compute gamma internally
+        proverFirstMsg,
+        true // skipTokenValidation
+    )
+
+    // Issuer creates third message
+    const thirdMessage = issuerAPISession.sendSecondandGetThirdMessage()
+
+    // Prover generates tokens
+    const proverThirdMessage = protocolTest.prover.ip.ParseThirdMessage(thirdMessage)
+    const keyAndBaseToken = protocolTest.prover.generateTokens(proverThirdMessage)
+```
+A prover also generates presentation proofs for relying parties or verifiers.  In a presentation proof the prover reveals some attributes or assertions about attributes in a U-Prove token, along with a proof that the issuer token is valid and these assertions are true about the attributes the issuer saw when creating the token.
+```
+    const token: SerializedUProveToken = {
+        ...keyAndBaseToken[0].token,
+        uidp: uint8ArrayToBase64(ip.uidp),
+        ti: uint8ArrayToBase64(ti),
+        pi: uint8ArrayToBase64(pi),
+    }
+    const { key } = keyAndBaseToken[0]
+
+    const ukat = protocolTest.ip.ParseKeyAndToken({ key, token })
+
+    const proof = prover.generateProof(
+        ukat,
+        disclosed, // array of indexes of the attributes to disclose
+        committed || [], // committed attributes used in some extensions
+        message, // Uint8Array message for this proof
+        messageD, // device message
+        attributes, // cleartedxt attributes
+        scopeData,
+        commitmentPrivateValues
+    )
+```
+Finally the [`Verifier`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/verifier.ts) is the third core component of this SDK. The verifier receives proofs from a prover and can validate the issuer signature ad validate the proof.
+```
+
+    const verifier = new Verifier(ip)
+    const tokenIsValid = verifyTokenSignature(ukat.token)
+    // Don't proceed if not valid!!!
+
+    const parsedProof = verifier.parseProof(proof)
+
+    const isValid = verifier.verify(parsedProof, ukat.token, disclosed, [], message, messageD)
+    // Don't trust attributes if not valid!!!
+```
 ## Contents
 ### Relationship with the MSR SDK
 To help you understand the relationship with the Microsoft Research U-Prove SDK, here is a list of files organized by their relationship with the MSR code.
