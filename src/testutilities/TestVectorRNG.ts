@@ -3,22 +3,12 @@
  *
  * Copyright (c) 2020 Privacy Research, LLC
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *  Licensed under GPL v3 (https://www.gnu.org/licenses/gpl-3.0.en.html)
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
-
-This code is a modification of Microsoft Research's U-Prove
-Javascript SDK (https://www.microsoft.com/en-us/download/details.aspx?id=52491). These
-portions are Copyright (c) Microsoft.  Changes to these portions include reorganization
-and addition of type information.
+ *  This code is a modification of Microsoft Research's U-Prove
+ *  Javascript SDK (https://www.microsoft.com/en-us/download/details.aspx?id=52491). These
+ *  portions are Copyright (c) Microsoft.  Changes to these portions include reorganization
+ *  and addition of type information.
  */
 
 import { Zq, ZqElement } from '../datatypes'
