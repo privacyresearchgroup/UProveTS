@@ -347,12 +347,11 @@ export class Prover implements ProverData, ProverFunctions {
         let ap: Uint8Array | null = null
         let Ps: GroupElement | null = null
         if (scopeData) {
-            let gs
+            let gs: GroupElement
             if (scopeData.gs) {
                 gs = this.Gq.createElementFromBytes(scopeData.gs)
             } else {
-                throw new Error('generateScopeElement not implemented')
-                // gs = this.ip.descGq.generateScopeElement(scopeData.s)
+                gs = this.ip.descGq.generateScopeElement(scopeData.s)
             }
             const apInput = this.Gq.getIdentityElement()
             this.Gq.modexp(gs, w[wpIndex], apInput)
