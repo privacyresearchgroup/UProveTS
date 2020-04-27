@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": "https://github.com/rolfeschmidt/UProveTS.git",
   "author": "Rolfe Schmidt <rolfe@alumni.princeton.edu>",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "private": false,
   "scripts": {
     "test": "jest --config jestconfig.json",
