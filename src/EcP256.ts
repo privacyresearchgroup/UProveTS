@@ -26,7 +26,15 @@
 
 import cryptoMath from './msrcrypto/cryptoMath'
 import cryptoECC from './msrcrypto/cryptoECC'
-import { HashFunctions, MultiplicativeGroup, DLGroup } from './datatypes'
+import {
+    HashFunctions,
+    MultiplicativeGroup,
+    DLGroup,
+    GroupElement,
+    ECGroupElement,
+    ZqElement,
+    isECGroupElement,
+} from './datatypes'
 import { Hash } from './hash'
 
 export class ECGroup implements MultiplicativeGroup {
@@ -38,88 +46,100 @@ export class ECGroup implements MultiplicativeGroup {
         this.ecOperator = cryptoECC.EllipticCurveOperatorFp(curve)
     }
     // allocates an element to store some computation results
-    getIdentityElement(): any {
+    getIdentityElement(): GroupElement {
         // return the point at infinity
         return this.curve.createPointAtInfinity()
     }
 
     // creates an element from the serialized bytes
-    createElementFromBytes(bytes): any {
+    createElementFromBytes(bytes: Uint8Array | number[]): GroupElement {
         return cryptoECC.sec1EncodingFp().decodePoint(bytes, this.curve)
     }
 
-    createPoint(x, y): any {
-        return cryptoECC.EllipticCurvePointFp(
+    createPoint(x, y): ECGroupElement {
+        return (cryptoECC.EllipticCurvePointFp(
             this.curve,
             false,
             cryptoMath.bytesToDigits(x),
             cryptoMath.bytesToDigits(y)
-        )
+        ) as unknown) as ECGroupElement // 🤮
     }
 
     // computes result = [scalar] point.
-    modexp(point, scalar, result): void {
-        // point must be in Affine, Montgomery form
-        if (!point.isAffine) {
-            this.ecOperator.convertToAffineForm(point)
-        }
-        if (!point.isInMontgomeryForm) {
-            this.ecOperator.convertToMontgomeryForm(point)
-        }
+    modexp(point: GroupElement, scalar: ZqElement, result: GroupElement): void {
+        if (!isECGroupElement(point)) {
+            console.error({ result, point })
+            throw new Error('exponentiating non-curve GroupElement on elliptic curve')
+        } else if (!isECGroupElement(result)) {
+            console.error({ point, result })
+            throw new Error('result must be EC group element')
+        } else {
+            // point must be in Affine, Montgomery form
+            if (!point.isAffine) {
+                this.ecOperator.convertToAffineForm(point)
+            }
+            if (!point.isInMontgomeryForm) {
+                this.ecOperator.convertToMontgomeryForm(point)
+            }
 
-        // scalar multiplication
-        this.ecOperator.scalarMultiply(scalar.m_digits, point, result)
+            // scalar multiplication
+            this.ecOperator.scalarMultiply(scalar.m_digits, point, result)
 
-        // convert everyone back to Affine, Standard form
-        if (!point.isAffine) {
-            this.ecOperator.convertToAffineForm(point)
-        }
-        if (point.isInMontgomeryForm) {
-            this.ecOperator.convertToStandardForm(point)
-        }
-        if (!result.isAffine) {
-            this.ecOperator.convertToAffineForm(result)
-        }
-        if (result.isInMontgomeryForm) {
-            this.ecOperator.convertToStandardForm(result)
+            // convert everyone back to Affine, Standard form
+            if (!point.isAffine) {
+                this.ecOperator.convertToAffineForm(point)
+            }
+            if (point.isInMontgomeryForm) {
+                this.ecOperator.convertToStandardForm(point)
+            }
+            if (!result.isAffine) {
+                this.ecOperator.convertToAffineForm(result)
+            }
+            if (result.isInMontgomeryForm) {
+                this.ecOperator.convertToStandardForm(result)
+            }
         }
     }
 
     // computes result = a + b
-    multiply(a, b, result): void {
-        // result must be in Jacobian, Montgomery form for the mixed add
-        const temp = this.curve.allocatePointStorage()
-        this.ecOperator.convertToMontgomeryForm(temp)
-        this.ecOperator.convertToJacobianForm(temp)
+    multiply(a: GroupElement, b: GroupElement, result: GroupElement): void {
+        if (!isECGroupElement(a) || !isECGroupElement(b) || !isECGroupElement(result)) {
+            throw new Error('attempting no multiply non-EC points on an elliptic curve')
+        } else {
+            // result must be in Jacobian, Montgomery form for the mixed add
+            const temp = this.curve.allocatePointStorage()
+            this.ecOperator.convertToMontgomeryForm(temp)
+            this.ecOperator.convertToJacobianForm(temp)
 
-        // "a" must be in Jacobian, Montgomery form
-        if (!a.isInMontgomeryForm) {
-            this.ecOperator.convertToMontgomeryForm(a)
+            // "a" must be in Jacobian, Montgomery form
+            if (!a.isInMontgomeryForm) {
+                this.ecOperator.convertToMontgomeryForm(a)
+            }
+            if (a.isAffine) {
+                this.ecOperator.convertToJacobianForm(a)
+            }
+
+            // "b" must be in Affine, Montgomery form
+            if (!b.isAffine) {
+                this.ecOperator.convertToAffineForm(b)
+            }
+            if (!b.isInMontgomeryForm) {
+                this.ecOperator.convertToMontgomeryForm(b)
+            }
+
+            // perform the mixed add
+            this.ecOperator.mixedAdd(a, b, temp)
+
+            // now convert everyone back to Affine, Standard form
+            this.ecOperator.convertToAffineForm(a)
+            this.ecOperator.convertToStandardForm(a)
+            // b already in affine form
+            this.ecOperator.convertToStandardForm(b)
+            this.ecOperator.convertToAffineForm(temp)
+            this.ecOperator.convertToStandardForm(temp)
+
+            temp.copy(result)
         }
-        if (a.isAffine) {
-            this.ecOperator.convertToJacobianForm(a)
-        }
-
-        // "b" must be in Affine, Montgomery form
-        if (!b.isAffine) {
-            this.ecOperator.convertToAffineForm(b)
-        }
-        if (!b.isInMontgomeryForm) {
-            this.ecOperator.convertToMontgomeryForm(b)
-        }
-
-        // perform the mixed add
-        this.ecOperator.mixedAdd(a, b, temp)
-
-        // now convert everyone back to Affine, Standard form
-        this.ecOperator.convertToAffineForm(a)
-        this.ecOperator.convertToStandardForm(a)
-        // b already in affine form
-        this.ecOperator.convertToStandardForm(b)
-        this.ecOperator.convertToAffineForm(temp)
-        this.ecOperator.convertToStandardForm(temp)
-
-        temp.copy(result)
     }
 }
 
@@ -3727,9 +3747,12 @@ class ECP256Object implements DLGroup {
 
     Gp = cryptoMath.IntegerGroup(cryptoMath.digitsToBytes(this.p256.p))
     GpZero = this.Gp.createElementFromInteger(0)
-    // generateScopeElement(s): any {
+
+    // computeVerifiablyRandomElement(context: Uint8Array, index: byte): GroupElement {}
+
+    // generateScopeElement(s): GroupElement {
     //     if (!s) {
-    //         throw 'invalid scope'
+    //         throw new Error('invalid scope')
     //     }
     //     const sqrtSolver = new cryptoMath.ModularSquareRootSolver(this.p256.p /*, rand*/) // no need to set rand when using NIST curves
     //     let x = null

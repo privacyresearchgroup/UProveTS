@@ -295,6 +295,7 @@ function MsrcryptoECC() {
         // NOTE: added for U-Prove
         return cryptoECC.sec1EncodingFp().encodePoint(this)
       },
+      copyTo,
     }
 
     createProperty(

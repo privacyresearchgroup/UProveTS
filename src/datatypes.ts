@@ -50,6 +50,21 @@ export interface GroupElement {
     toByteArrayUnsigned: () => Uint8Array
 }
 
+export interface ECGroupElement extends GroupElement {
+    copy: (destination: ECGroupElement) => void
+    x: number[] // digits of x coordinate
+    y: number[] // digits of y coordinate
+    z?: number[] // digits of z coordinate
+    isInMontgomeryForm: boolean
+    isInfinity: boolean
+    isAffine: boolean
+    curve: any
+}
+
+export function isECGroupElement(g: GroupElement): g is ECGroupElement {
+    return !!(g as any).curve
+}
+
 export interface ZqElement {
     m_digits: number[]
     m_group: Zq
@@ -235,8 +250,8 @@ export interface ProverFunctions {
     generateSecondMessage: (
         numberOfTokens: number,
         attributes: Attribute[],
-        ti: Uint8Array, // TODO: is this Uint8Array?
-        pi: Uint8Array, // TODO: is this Uint8Array?
+        ti: Uint8Array,
+        pi: Uint8Array,
         externalGamma: byte[] | null,
         firstMsg: FirstMessage,
         skipTokenValidation: boolean
