@@ -86,6 +86,8 @@ export interface DLGroup {
     updateHash: (h: HashFunctions) => void
     getGenerator: () => GroupElement
     getPreGenGenerators: (n: number) => GroupElement[]
+    computeVerifiablyRandomElement: (context: Uint8Array, index: byte) => GroupElement
+    generateScopeElement: (s: Uint8Array) => GroupElement
 }
 
 export interface GroupDescription {

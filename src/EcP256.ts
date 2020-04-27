@@ -34,6 +34,7 @@ import {
     ECGroupElement,
     ZqElement,
     isECGroupElement,
+    byte,
 } from './datatypes'
 import { Hash } from './hash'
 
@@ -56,7 +57,7 @@ export class ECGroup implements MultiplicativeGroup {
         return cryptoECC.sec1EncodingFp().decodePoint(bytes, this.curve)
     }
 
-    createPoint(x, y): ECGroupElement {
+    createPoint(x: Uint8Array | number[], y: Uint8Array | number[]): ECGroupElement {
         return (cryptoECC.EllipticCurvePointFp(
             this.curve,
             false,
@@ -3734,7 +3735,7 @@ class ECP256Object implements DLGroup {
         return gen
     }
 
-    getX(input, counter): any {
+    getX(input: Uint8Array, counter: number): ZqElement {
         const numIterations = 1 // for P-256/SHA-256, ratio is 1
         const H = new Hash()
         const zeroByte = 0x30 // ascii value for 0
@@ -3748,47 +3749,48 @@ class ECP256Object implements DLGroup {
     Gp = cryptoMath.IntegerGroup(cryptoMath.digitsToBytes(this.p256.p))
     GpZero = this.Gp.createElementFromInteger(0)
 
-    // computeVerifiablyRandomElement(context: Uint8Array, index: byte): GroupElement {}
+    computeVerifiablyRandomElement(context: Uint8Array, index: byte): GroupElement {
+        const sqrtSolver = new cryptoMath.ModularSquareRootSolver(this.p256.p /*, rand*/) // no need to set rand when using NIST curves
+        let x: ZqElement
+        let y: number[] | null = null
+        let count = 0
+        while (y === null) {
+            x = this.getX(context, count)
+            // z = x^3 + ax + b mod p
+            const z = this.Gp.getIdentityElement()
+            this.Gp.modmul(x, x, z) // z = x^2 mod p
+            const a = this.Gp.createElementFromDigits(this.p256.a)
+            this.Gp.add(z, a, z) // z = x^2 + a mod p
+            this.Gp.modmul(z, x, z) // z = x^3 + ax mod p
+            const b = this.Gp.createElementFromDigits(this.p256.b)
+            this.Gp.add(z, b, z) // z = x^3 + ax + b mod p
+            if (cryptoMath.compareDigits(z.m_digits, this.GpZero.m_digits)) {
+                y = z
+            } else {
+                // y = Sqrt(z)
+                // i.e. y such that y^2 === z mod p
+                // or null if no such element exists
+                y = sqrtSolver.squareRoot(z.m_digits)
+            }
+            count++
+        }
+        // take the smallest sqrt of y
+        let finalY = cryptoMath.intToDigits(0, this.Gp.m_digitWidth)
+        cryptoMath.subtract(this.p256.p, y, finalY)
+        if (cryptoMath.compareDigits(y, finalY) < 0) {
+            finalY = y
+        }
 
-    // generateScopeElement(s): GroupElement {
-    //     if (!s) {
-    //         throw new Error('invalid scope')
-    //     }
-    //     const sqrtSolver = new cryptoMath.ModularSquareRootSolver(this.p256.p /*, rand*/) // no need to set rand when using NIST curves
-    //     let x = null
-    //     let y = null
-    //     let count = 0
-    //     const index = 0
-    //     while (y === null) {
-    //         x = this.getX(s, count)
-    //         // z = x^3 + ax + b mod p
-    //         const z = this.Gp.getIdentityElement()
-    //         this.Gp.modmul(x, x, z) // z = x^2 mod p
-    //         const a = this.Gp.createElementFromDigits(this.p256.a)
-    //         this.Gp.add(z, a, z) // z = x^2 + a mod p
-    //         this.Gp.modmul(z, x, z) // z = x^3 + ax mod p
-    //         const b = this.Gp.createElementFromDigits(this.p256.b)
-    //         this.Gp.add(z, b, z) // z = x^3 + ax + b mod p
-    //         if (cryptoMath.compareDigits(z.m_digits, this.GpZero.m_digits)) {
-    //             y = z
-    //         } else {
-    //             // y = Sqrt(z)
-    //             // i.e. y such that y^2 === z mod p
-    //             // or null if no such element exists
-    //             y = sqrtSolver.squareRoot(z.m_digits)
-    //         }
-    //         count++
-    //     }
-    //     // take the smallest sqrt of y
-    //     let finalY = cryptoMath.intToDigits(0, this.Gp.m_digitWidth)
-    //     cryptoMath.subtract(this.p256.p, y, finalY)
-    //     if (cryptoMath.compareDigits(y, finalY) < 0) {
-    //         finalY = y
-    //     }
+        return this.Gq.createPoint(x!.toByteArrayUnsigned(), cryptoMath.digitsToBytes(finalY))
+    }
 
-    //     count = count - 1 // was counter = count - 1... WTH?
-    //     return this.Gq.createPoint(x.toByteArrayUnsigned(), cryptoMath.digitsToBytes(finalY))
-    // }
+    generateScopeElement(s: Uint8Array): GroupElement {
+        if (!s) {
+            throw new Error('invalid scope')
+        }
+
+        return this.computeVerifiablyRandomElement(s, 0)
+    }
 
     OID = '1.3.6.1.4.1.311.75.1.2.1'
 }
