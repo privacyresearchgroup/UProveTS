@@ -42,7 +42,7 @@ import { TestVectorRNG } from '../testutilities/TestVectorRNG'
 
 let totalTime = 0
 
-const testLiteMode = true // lite;
+const testLiteMode = false // lite;
 const testECC = true //  ecc;
 const testVectorFile = 'testvectors_' + (testECC ? 'EC' : 'SG') + '_D2' + (testLiteMode ? '_lite' : '') + '_doc.txt'
 const recommendedParamsFile = 'UProveRecommendedParams' + (testECC ? 'P256' : 'L2048N256') + '.txt'
@@ -216,11 +216,16 @@ test('generate proof', () => {
     const { key } = keyAndBaseToken[0]
 
     const disclosed = readNumberList(vectors['D'])
-    const committed = null
+    const committed = testLiteMode ? null : readNumberList(vectors['C'])
     const undisclosed = readNumberList(vectors['U'])
     const message = readHexString(vectors['m'])
     const messageD = readHexString(vectors['md'])
-    const scopeData = null
+    const scopeData = testLiteMode
+        ? null
+        : {
+              p: parseInt(vectors['p'], 10),
+              gs: readVectorElement(Gq, vectors, 'gs', useECC).toByteArrayUnsigned(),
+          }
     const commitmentPrivateValues = {}
     const t1 = performanceTimer.now()
     const ukat = ip.ParseKeyAndToken({ key, token })
