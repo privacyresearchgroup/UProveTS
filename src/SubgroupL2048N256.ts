@@ -20,7 +20,8 @@
 // *********************************************************
 
 import cryptoMath from './msrcrypto/cryptoMath'
-import { HashFunctions, MultiplicativeGroup, DLGroup } from './datatypes'
+import { HashFunctions, MultiplicativeGroup, DLGroup, ZqElement, GroupElement, byte } from './datatypes'
+import { Hash } from './hash'
 
 // tslint:disable: number-literal-format
 class SGGroup implements MultiplicativeGroup {
@@ -36,7 +37,7 @@ class SGGroup implements MultiplicativeGroup {
     }
 
     // creates an element from the serialized bytes
-    createElementFromBytes(bytes): any {
+    createElementFromBytes(bytes): GroupElement {
         return this.integerGroup.createElementFromBytes(bytes)
     }
 
@@ -14000,6 +14001,7 @@ class L2048N256Object implements DLGroup {
 
     Gq = new SGGroup(cryptoMath.IntegerGroup(this.p))
     getGq = () => this.Gq
+    private _two = this.Gq.integerGroup.createElementFromInteger(2)
 
     Zq = cryptoMath.IntegerGroup(this.q)
     getZq = () => ({ ...this.Zq, getIdentityElement: () => this.Zq.createElementFromInteger(1) })
@@ -14029,31 +14031,34 @@ class L2048N256Object implements DLGroup {
     }
 
     eElement = this.Gq.createElementFromBytes(this.e)
-    // generateScopeElement = (s: Uint8Array) => {
-    //     if (!s) {
-    //         throw new Error('invalid scope')
-    //     }
 
-    //     const index = 0
-    //     let count = 0
-    //     const g = this.Gq.createElementFromInteger(0)
+    computeVerifiablyRandomElement(context: Uint8Array, index: byte): GroupElement {
+        let count = 0
+        const g = this.Gq.integerGroup.createElementFromInteger(0)
 
-    //     let hashInput = Array.from(s) // Array.apply([], s)
-    //     hashInput = hashInput.concat([0x67, 0x67, 0x65, 0x6e, index, count])
-    //     while (cryptoMath.compareDigits(g.m_digits, this.Gq.m_two) < 0) {
-    //         // g < 2
-    //         if (count === 255) {
-    //             throw new Error("can't generate scope element, max count has been reached")
-    //         }
-    //         count++
-    //         const hash = new Hash()
-    //         hashInput[hashInput.length - 1] = count
-    //         hash.updateRawArray(hashInput)
-    //         const W = this.Gq.createElementFromBytes(hash.digest())
-    //         this.Gq.modexp(W, this.eElement, g)
-    //     }
-    //     return g
-    // }
+        let hashInput = Array.from(context) // Array.apply([], s)
+        hashInput = hashInput.concat([0x67, 0x67, 0x65, 0x6e, index, count])
+        while (cryptoMath.compareDigits(g.m_digits, this._two.m_digits) < 0) {
+            // g < 2
+            if (count === 255) {
+                throw new Error("can't generate scope element, max count has been reached")
+            }
+            count++
+            const hash = new Hash()
+            hashInput[hashInput.length - 1] = count
+            hash.updateRawArray(hashInput)
+            const W = this.Gq.createElementFromBytes(hash.digest())
+            this.Gq.modexp(W, this.eElement, g)
+        }
+        return g
+    }
+
+    generateScopeElement = (s: Uint8Array) => {
+        if (!s) {
+            throw new Error('invalid scope')
+        }
+        return this.computeVerifiablyRandomElement(s, 0)
+    }
     OID = '1.3.6.1.4.1.311.75.1.1.1'
 }
 
