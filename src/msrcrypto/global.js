@@ -60,7 +60,8 @@ export function createProperty(parentObject, propertyName, /*@dynamic*/ initialV
     return
   }
 
-  const setGet = {}
+  // make these enumerable so we see them in debugging. TODO: is there ar reason to hide them?
+  const setGet = { enumerable: true }
 
   getterFunction && (setGet.get = getterFunction)
   setterFunction && (setGet.set = setterFunction)
