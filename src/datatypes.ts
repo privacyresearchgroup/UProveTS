@@ -206,8 +206,8 @@ export interface IssuanceState {
 
 export interface ScopeData {
     p: number
-    s?: any
-    gs: any
+    s?: Uint8Array
+    gs?: Uint8Array
 }
 
 export interface SerializedProof {
