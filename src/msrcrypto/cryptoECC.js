@@ -279,6 +279,24 @@ function MsrcryptoECC() {
         )
       }
     }
+    function validate() {
+      const Zp = cryptoMath.IntegerGroup(cryptoMath.digitsToBytes(curve.p))
+      const ex = Zp.createElementFromDigits(x)
+      const why = Zp.createElementFromDigits(y)
+      const x3 = Zp.createElementFromInteger(1)
+
+      const rhs = Zp.createElementFromInteger(1)
+      const a = Zp.createElementFromDigits(curve.a)
+      const b = Zp.createElementFromDigits(curve.b)
+      Zp.multiply(ex, ex, rhs)
+      Zp.add(rhs, a, rhs)
+      Zp.multiply(rhs, ex, rhs)
+      Zp.add(rhs, b, rhs)
+
+      const lhs = Zp.createElementFromInteger(0)
+      Zp.multiply(why, why, lhs)
+      return cryptoMath.sequenceEqual(lhs.m_digits, rhs.m_digits)
+    }
 
     returnObj = /*@static_cast(EllipticCurvePointFp)*/ {
       equals: function (ellipticCurvePointFp) {
@@ -296,6 +314,7 @@ function MsrcryptoECC() {
         return cryptoECC.sec1EncodingFp().encodePoint(this)
       },
       copyTo,
+      validate,
     }
 
     createProperty(
@@ -1887,7 +1906,7 @@ function MsrcryptoECC() {
       },
     }
   }
-  var ModularSquareRootSolver = function (modulus) {
+  const ModularSquareRootSolver = function (modulus) {
     /// <param name="modulus" type="Digits"/>
 
     // The modulus we are going to use.
