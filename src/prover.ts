@@ -346,15 +346,18 @@ export class Prover implements ProverData, ProverFunctions {
         const a = hash.digest()
         let ap: Uint8Array | null = null
         let Ps: GroupElement | null = null
+
         if (scopeData) {
             let gs: GroupElement
             if (scopeData.gs) {
                 gs = this.Gq.createElementFromBytes(scopeData.gs)
             } else {
-                gs = this.ip.descGq.generateScopeElement(scopeData.s)
+                console.log(`generating scope element`, { scopeData })
+                gs = this.ip.descGq.generateScopeElement(scopeData.s!)
             }
             const apInput = this.Gq.getIdentityElement()
             this.Gq.modexp(gs, w[wpIndex], apInput)
+
             const hash = new Hash()
             hash.updateBytes(apInput.toByteArrayUnsigned())
             ap = hash.digest()
