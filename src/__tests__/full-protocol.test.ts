@@ -7,7 +7,15 @@
  *
  */
 
-import { Attribute, DLGroup, MultiplicativeGroup, ZqField, ZqElement, SerializedUProveToken } from '../datatypes'
+import {
+    Attribute,
+    DLGroup,
+    MultiplicativeGroup,
+    ZqField,
+    ZqElement,
+    SerializedUProveToken,
+    ScopeData,
+} from '../datatypes'
 import { IssuerParams } from '../issuerparams'
 import { Prover } from '../prover'
 import ECP256 from '../EcP256'
@@ -164,7 +172,7 @@ test('run protocol', () => {
     const undisclosed = readNumberList(vectors.U)
     const message = readHexString(vectors.m)
     const messageD = readHexString(vectors.md)
-    const scopeData = null
+    const scopeData: ScopeData = { p: 1, s: Uint8Array.from([90, 11, 117, 103, 103, 108, 97]) }
     const commitmentPrivateValues = {}
     const t1 = performanceTimer.now()
     const ukat = protocolTest.ip.ParseKeyAndToken({ key, token })
@@ -189,7 +197,7 @@ test('run protocol', () => {
 
     const parsedProof = verifier.parseProof(proof)
 
-    const isValid = verifier.verify(parsedProof, ukat.token, disclosed, [], message, messageD)
+    const isValid = verifier.verify(parsedProof, ukat.token, disclosed, [], message, scopeData, messageD)
     // console.log(isValid)
     // console.log(protocolTest.ip.serialize())
     // console.log(uint8ArrayToBase64(protocolTest.y0.toByteArrayUnsigned()))

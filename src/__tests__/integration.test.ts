@@ -141,7 +141,7 @@ test('test get issuer params', async () => {
 
     const parsedProof = verifier.parseProof(proof)
 
-    const isValid = verifier.verify(parsedProof, ukat.token, disclosed, [], message, messageD)
+    const isValid = verifier.verify(parsedProof, ukat.token, disclosed, [], message, scopeData, messageD)
     // console.log(isValid)
     // console.log(protocolTest.ip.serialize())
     // console.log(uint8ArrayToBase64(protocolTest.y0.toByteArrayUnsigned()))
