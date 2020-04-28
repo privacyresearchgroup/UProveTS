@@ -17,8 +17,17 @@ import {
     GroupElement,
     ZqElement,
     UProveToken,
+    ScopeData,
 } from './datatypes'
-import { base64ToUint8Array, base64ToArray, generateChallenge, computeX, multiModExp, computeXt } from './utilities'
+import {
+    base64ToUint8Array,
+    base64ToArray,
+    generateChallenge,
+    computeX,
+    multiModExp,
+    computeXt,
+    uint8ArrayToBase64,
+} from './utilities'
 import { Hash } from './hash'
 import cryptoMath from './msrcrypto/cryptoMath'
 
@@ -99,11 +108,15 @@ export class Verifier {
         return scp.equals(shouldBeScp)
     }
 
-    /***
-     * Note that the field`D` in `proof` contains the disclosed attributes.
-     * The input `D` contains the indices of the disclosed attributes.
-     */
-    verify(proof: Proof, token: UProveToken, D: number[], C: number[], m: Uint8Array, md?: Uint8Array): boolean {
+    verify(
+        proof: Proof,
+        token: UProveToken,
+        D: number[],
+        C: number[],
+        m: Uint8Array,
+        scopeData: ScopeData | null,
+        md?: Uint8Array
+    ): boolean {
         const disclosedX: ZqElement[] = []
         for (let i = 0; i < proof.D.length; i++) {
             disclosedX[i] = computeX(this.Zq, proof.D[i], this.ip.e[D[i] - 1])
@@ -119,12 +132,30 @@ export class Verifier {
             C,
             proof.tc,
             proof.ta,
-            0, // scopeData?.p || 0
+            scopeData?.p || 0,
             proof.ap || null,
             proof.Ps || null,
             m,
             md
         )
+        const attributesValid = this.verifyDisclosedAttributes(proof, token, c, D)
+        if (!attributesValid) {
+            console.log(`attributes not valid!`)
+            return false
+        }
+        return scopeData ? this.verifyScopePseudonym(proof, scopeData, c) : true
+    }
+
+    /***
+     * Note that the field`D` in `proof` contains the disclosed attributes.
+     * The input `D` contains the indices of the disclosed attributes.
+     */
+    verifyDisclosedAttributes(proof: Proof, token: UProveToken, c: ZqElement, D: number[]): boolean {
+        const disclosedX: ZqElement[] = []
+        for (let i = 0; i < proof.D.length; i++) {
+            disclosedX[i] = computeX(this.Zq, proof.D[i], this.ip.e[D[i] - 1])
+        }
+
         const minusC = this.Zq.createElementFromInteger(0)
         this.Zq.subtract(this.Zq.createElementFromInteger(0), c, minusC)
 
@@ -159,5 +190,30 @@ export class Verifier {
         const shouldBeA = hash.digest()
 
         return cryptoMath.sequenceEqual(proof.a, shouldBeA)
+    }
+
+    verifyScopePseudonym(proof: Proof, scopeData: ScopeData, c: ZqElement): boolean {
+        if (proof.ap && proof.Ps) {
+            const gs = scopeData.gs
+                ? this.Gq.createElementFromBytes(scopeData.gs)
+                : this.ip.descGq.generateScopeElement(scopeData.s!)
+            const bases = [proof.Ps, gs]
+            const exponents = [c, proof.r[scopeData.p]]
+
+            const gspow = this.Gq.getIdentityElement()
+            this.Gq.modexp(gs, proof.r[scopeData.p], gspow)
+
+            const Pspow = this.Gq.getIdentityElement()
+            this.Gq.modexp(proof.Ps, c, Pspow)
+            const apInput = this.Gq.getIdentityElement()
+            const altInput = multiModExp(this.Gq, bases, exponents)
+            this.Gq.multiply(gspow, Pspow, apInput)
+            const hash = new Hash()
+            hash.updateBytes(apInput.toByteArrayUnsigned())
+            const shouldBeAp = hash.digest()
+
+            return cryptoMath.sequenceEqual(proof.ap, shouldBeAp)
+        }
+        return true
     }
 }
