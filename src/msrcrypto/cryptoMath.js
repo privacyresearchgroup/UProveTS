@@ -1619,6 +1619,9 @@ function MsrcryptoMath() {
         temp0,
         temp1
       )
+
+      // TODO: consider padding the result as follows:
+      // normalizeDigitArray(product.m_digits, this.m_digitWidth, true)
     }
 
     function modexp(valueElement, exponent, outputElement) {
