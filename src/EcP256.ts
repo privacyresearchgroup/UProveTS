@@ -58,12 +58,17 @@ export class ECGroup implements MultiplicativeGroup {
     }
 
     createPoint(x: Uint8Array | number[], y: Uint8Array | number[]): ECGroupElement {
-        return (cryptoECC.EllipticCurvePointFp(
+        const result = cryptoECC.EllipticCurvePointFp(
             this.curve,
             false,
             cryptoMath.bytesToDigits(x),
             cryptoMath.bytesToDigits(y)
-        ) as unknown) as ECGroupElement // 🤮
+        )
+        if (!result.validate()) {
+            throw new Error('attempting to create a point that is not on the curve')
+        }
+
+        return (result as unknown) as ECGroupElement // 🤮
     }
 
     // computes result = [scalar] point.
@@ -3750,22 +3755,22 @@ class ECP256Object implements DLGroup {
     GpZero = this.Gp.createElementFromInteger(0)
 
     computeVerifiablyRandomElement(context: Uint8Array, index: byte): GroupElement {
-        const sqrtSolver = new cryptoMath.ModularSquareRootSolver(this.p256.p /*, rand*/) // no need to set rand when using NIST curves
+        const sqrtSolver = cryptoECC.ModularSquareRootSolver(this.p256.p /*, rand*/) // no need to set rand when using NIST curves
         let x: ZqElement
         let y: number[] | null = null
         let count = 0
         while (y === null) {
             x = this.getX(context, count)
             // z = x^3 + ax + b mod p
-            const z = this.Gp.getIdentityElement()
-            this.Gp.modmul(x, x, z) // z = x^2 mod p
+            const z = this.Gp.createElementFromInteger(1) // multiplicative identity
+            this.Gp.multiply(x, x, z) // z = x^2 mod p
             const a = this.Gp.createElementFromDigits(this.p256.a)
             this.Gp.add(z, a, z) // z = x^2 + a mod p
-            this.Gp.modmul(z, x, z) // z = x^3 + ax mod p
+            this.Gp.multiply(z, x, z) // z = x^3 + ax mod p
             const b = this.Gp.createElementFromDigits(this.p256.b)
             this.Gp.add(z, b, z) // z = x^3 + ax + b mod p
-            if (cryptoMath.compareDigits(z.m_digits, this.GpZero.m_digits)) {
-                y = z
+            if (cryptoMath.compareDigits(z.m_digits, this.GpZero.m_digits) === 0) {
+                y = z.m_digits
             } else {
                 // y = Sqrt(z)
                 // i.e. y such that y^2 === z mod p
@@ -3774,6 +3779,10 @@ class ECP256Object implements DLGroup {
             }
             count++
         }
+        // validate
+        const y2 = this.Gp.createElementFromInteger(1)
+        const yelt = this.Gp.createElementFromDigits(y)
+        this.Gp.multiply(yelt, yelt, y2)
         // take the smallest sqrt of y
         let finalY = cryptoMath.intToDigits(0, this.Gp.m_digitWidth)
         cryptoMath.subtract(this.p256.p, y, finalY)
