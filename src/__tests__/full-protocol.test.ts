@@ -203,4 +203,8 @@ test('run protocol', () => {
     // console.log(uint8ArrayToBase64(protocolTest.y0.toByteArrayUnsigned()))
     // console.log(protocolTest.issuerSession.serialize())
     expect(isValid).toBe(true)
+
+    // test that prover can compute the pseudonym correctly
+    const pseudo = protocolTest.prover.computePseudonym(scopeData, protocolTest.attributes)
+    expect(pseudo).toBe(proof.Ps)
 })

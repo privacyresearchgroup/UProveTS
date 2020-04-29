@@ -45,6 +45,7 @@ import {
     ATimesBPlusCModQ,
 } from './utilities'
 import { Hash } from './hash'
+import { pseudoRandomBytes } from 'crypto'
 
 export class Prover implements ProverData, ProverFunctions {
     rng: RandomNumberGenerator
@@ -436,6 +437,27 @@ export class Prover implements ProverData, ProverFunctions {
         }
         return proof
     }
+
+    computePseudonym(scopeData: ScopeData, attributes: Attribute[]): string {
+        const n = this.ip.e.length
+        const x = new Array(n + 2)
+
+        for (let i = 1; i <= n; i++) {
+            x[i] = computeX(this.Zq, attributes[i - 1], this.ip.e[i - 1])
+        }
+
+        let gs: GroupElement
+        if (scopeData.gs) {
+            gs = this.Gq.createElementFromBytes(scopeData.gs)
+        } else {
+            console.log(`generating scope element`, { scopeData })
+            gs = this.ip.descGq.generateScopeElement(scopeData.s!)
+        }
+        const Ps = this.Gq.getIdentityElement()
+        this.Gq.modexp(gs, x[scopeData.p], Ps)
+        return uint8ArrayToBase64(Ps.toByteArrayUnsigned())
+    }
+
     verifiableEncrypt(
         escrowParams: any,
         escrowPublicKey: any,
