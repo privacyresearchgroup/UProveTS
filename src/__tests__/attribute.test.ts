@@ -30,4 +30,7 @@ test('to and from JSON', () => {
     const json2 = as2.json
     console.log(json2)
     expect(json2).toEqual(testjson)
+
+    expect(as.indexOfAttribute('motto')).toBe(2)
+    expect(as2.indexOfAttribute('num')).toBe(3)
 })

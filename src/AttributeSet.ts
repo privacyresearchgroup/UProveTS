@@ -165,8 +165,9 @@ export class AttributeSet {
         return this.attributes.map((attr: DecoratedAttribute) => attr.encode())
     }
 
-    get e(): number[] {
-        return this.attributes.map((attr: DecoratedAttribute) => (attr.hashed ? 1 : 0))
+    indexOfAttribute(name: string): number {
+        const idx = this.attributes.findIndex((attr: DecoratedAttribute) => attr.name === name)
+        return idx
     }
 
     get json(): { [k: string]: string | number | boolean | null } {
