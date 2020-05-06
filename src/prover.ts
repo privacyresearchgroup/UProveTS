@@ -280,6 +280,9 @@ export class Prover implements ProverData, ProverFunctions {
                 throw new Error('either scopeData.s or scopeData.gs must be set')
             }
         }
+        if (D.find((n: number) => n === scopeData?.p)) {
+            throw new Error(`It is an error to disclose the pseudonym attribute (attribute index: ${scopeData?.p})`)
+        }
 
         const token = keyAndToken.token
 
