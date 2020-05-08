@@ -233,7 +233,7 @@ export interface Proof {
     tr?: ZqElement[]
 }
 
-export interface IEProof {
+export interface IDEscrowProof {
     E1: base64string
     E2: base64string
     info: base64string
@@ -281,7 +281,7 @@ export interface ProverFunctions {
         commitmentBytes: any,
         idAttribIndex: any,
         attribute: any
-    ) => IEProof | null
+    ) => IDEscrowProof | null
 }
 
 // Hash
