@@ -283,6 +283,10 @@ export class Prover implements ProverData, ProverFunctions {
         if (D.find((n: number) => n === scopeData?.p)) {
             throw new Error(`It is an error to disclose the pseudonym attribute (attribute index: ${scopeData?.p})`)
         }
+        if (D.find((n: number) => !!C.find((m: number) => n === m))) {
+            console.log(`Cannot commit to a disclosed attribute.`, { D, C })
+            throw new Error(`Cannot commit to a disclosed attribute.`)
+        }
 
         const token = keyAndToken.token
 
