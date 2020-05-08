@@ -607,6 +607,20 @@ test('test full proof with commitments', async () => {
         scopeData,
         commitmentPrivateValues
     )
+
+    // should not generate proof with commitment for disclosed attribute
+    expect(() => {
+        prover.generateProof(
+            ukat,
+            disclosed,
+            [2],
+            message,
+            messageD,
+            initialData.attributes,
+            scopeData,
+            commitmentPrivateValues
+        )
+    }).toThrow()
     console.log({ commitmentPrivateValues })
     expect(Object.keys(commitmentPrivateValues).length).toBe(1)
 
