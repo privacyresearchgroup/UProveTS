@@ -402,6 +402,7 @@ test('test full proof', async () => {
     // console.log(protocolTest.issuerSession.serialize())
     expect(isValid).toBe(true)
 })
+
 test('cannot disclose pseudonym attribute', async () => {
     jest.setTimeout(20000)
     const ip = await getParamsFromAPI()
@@ -504,4 +505,122 @@ test('cannot disclose pseudonym attribute', async () => {
             commitmentPrivateValues
         )
     ).toThrow()
+})
+
+test('test full proof with commitments', async () => {
+    jest.setTimeout(20000)
+    const ip = await getParamsFromAPI()
+    expect(ip).toBeDefined()
+
+    const pi = Uint8Array.from([1])
+
+    const prover = new Prover(new ZqRNG(ip.descGq.getZq()), ip)
+
+    const { id, firstMessage } = await startSession()
+    const secondMessage = prover.generateSecondMessage(
+        1,
+        initialData.attributes,
+        base64ToUint8Array(initialData.ti),
+        pi,
+        null,
+        ip.ParseFirstMessage(firstMessage),
+        true
+    )
+    const serializedThirdMessage = await completeSession(id, secondMessage)
+    const thirdMessage = ip.ParseThirdMessage(serializedThirdMessage)
+    console.log(serializedThirdMessage)
+    expect(thirdMessage).toBeDefined()
+
+    // Prover generates tokens
+    const keyAndBaseToken = prover.generateTokens(thirdMessage)
+    // console.log({ keyAndToken: keyAndBaseToken })
+    expect(keyAndBaseToken).toBeDefined()
+    expect(keyAndBaseToken[0]).toBeDefined()
+    expect(keyAndBaseToken[0].key).toBeDefined()
+    expect(keyAndBaseToken[0].token).toBeDefined()
+
+    // Prover generates proof
+
+    const token: SerializedUProveToken = {
+        ...keyAndBaseToken[0].token,
+        uidp: uint8ArrayToBase64(ip.uidp),
+        ti: initialData.ti,
+        pi: uint8ArrayToBase64(pi),
+    }
+    const { key } = keyAndBaseToken[0]
+
+    const disclosed = [2, 3, 5]
+    const committed = [4]
+    const message = Uint8Array.from([72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100])
+    const messageD = Uint8Array.from([66, 121, 101])
+    const scopeData = {
+        p: 1,
+        s: Uint8Array.from([
+            48,
+            50,
+            57,
+            55,
+            57,
+            97,
+            53,
+            97,
+            45,
+            52,
+            99,
+            101,
+            48,
+            45,
+            52,
+            48,
+            56,
+            48,
+            45,
+            98,
+            98,
+            49,
+            48,
+            45,
+            99,
+            99,
+            51,
+            101,
+            101,
+            57,
+            57,
+            100,
+            102,
+            50,
+            97,
+            101,
+        ]),
+    }
+    const commitmentPrivateValues = {}
+    const ukat = ip.ParseKeyAndToken({ key, token })
+
+    const proof = prover.generateProof(
+        ukat,
+        disclosed,
+        committed || [],
+        message,
+        messageD,
+        initialData.attributes,
+        scopeData,
+        commitmentPrivateValues
+    )
+    console.log({ commitmentPrivateValues })
+    expect(Object.keys(commitmentPrivateValues).length).toBe(1)
+
+    expect(proof).toBeDefined()
+
+    const verifier = new Verifier(ip)
+    expect(verifier.verifyTokenSignature(ukat.token)).toBe(true)
+
+    const parsedProof = verifier.parseProof(proof)
+
+    const isValid = verifier.verify(parsedProof, ukat.token, disclosed, committed || [], message, scopeData, messageD)
+    // console.log(isValid)
+    // console.log(protocolTest.ip.serialize())
+    // console.log(uint8ArrayToBase64(protocolTest.y0.toByteArrayUnsigned()))
+    // console.log(protocolTest.issuerSession.serialize())
+    expect(isValid).toBe(true)
 })
