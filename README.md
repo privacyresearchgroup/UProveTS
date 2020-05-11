@@ -1,11 +1,11 @@
 # TypeScript library for the U-Prove Anonymous Credential system
 
 This is a TypeScript SDK meant to allow developers to experiment with the [U-Prove](https://www.microsoft.com/en-us/research/project/u-prove/) anonymous credential system in web, mobile, and
-backend appliations. The mathematical core of this library is a direct port of Microsoft Research's [U-Prove Javascript SDK](https://www.microsoft.com/en-us/download/details.aspx?id=52491).
+backend applications. The mathematical core of this library is a direct port of Microsoft Research's [U-Prove Javascript SDK](https://www.microsoft.com/en-us/download/details.aspx?id=52491).
 
 ## Anonymous Credential Systems
 
-The U-Prove protocol is an anonymous credential system. It allows a user who we'll call a _prover_ to interact with an _issuer_ to create cryptographic tokens with a set of attributes signed by the issuer. Once might think of the issuer being a government issuing a passport, the user is the person getting the digital passport, and the attributes are all of the attributes of the user on the passport: name, birthdate, address, etc.
+The U-Prove protocol is an anonymous credential system. It allows a user who we'll call a _prover_ to interact with an _issuer_ to create cryptographic tokens with a set of attributes signed by the issuer. One might think of the issuer being a government issuing a passport, the user is the person getting the digital passport, and the attributes are all of the attributes of the user on the passport: name, birthdate, address, etc.
 
 Once these tokens are created the user can use them to create a _presentation proof_ where he shows that he has a valid token (e.g. he has an authentic digital passport) and that certain facts are true about the attributes (e.g. "my name is Bob", "I am over 18 years old", "My photo hash is ...").
 
@@ -174,4 +174,4 @@ This work is licensed under GPL v3 [https://www.gnu.org/licenses/gpl-3.0.en.html
 
 ## Future Development
 
-Short term development tasks are tracked using GitHube issues. Longer term, our goal is to complete implementation of U-Prove extensions for ID escrow, range proofs, and more. We also aim to create similar, compatible SDKs for other anonymous credential systems so that developers can easily experiment with these systems and compare alternatives.
+Short term development tasks are tracked using GitHub issues. Longer term, our goal is to complete implementation of U-Prove extensions for ID escrow, range proofs, and more. We also aim to create similar, compatible SDKs for other anonymous credential systems so that developers can easily experiment with these systems and compare alternatives.
