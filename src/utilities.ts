@@ -143,7 +143,7 @@ export function generateChallenge(Zq, issuerParam, token, a, D, disclosedX, C, t
 }
 
 export function generateIdEscrowChallenge(
-    Zq,
+    Zq: ZqField,
     UIDp,
     UIDt,
     H,
@@ -154,7 +154,7 @@ export function generateIdEscrowChallenge(
     E1Prime,
     E2Prime,
     additionalInfo
-): any {
+): ZqElement {
     // H(UID_p, UID_t, H, Cxb, E1, E2, Cxb', E1', E2', additionalInfo)
     const hash = new Hash()
     hash.updateBytes(UIDp)
