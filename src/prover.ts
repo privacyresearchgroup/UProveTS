@@ -30,7 +30,6 @@ import {
     KeyAndToken,
     ScopeData,
     SerializedProof,
-    IEProof,
     MultiplicativeGroup,
 } from './datatypes'
 import {
@@ -463,19 +462,5 @@ export class Prover implements ProverData, ProverFunctions {
         const Ps = this.Gq.getIdentityElement()
         this.Gq.modexp(gs, x[scopeData.p], Ps)
         return uint8ArrayToBase64(Ps.toByteArrayUnsigned())
-    }
-
-    verifiableEncrypt(
-        escrowParams: any,
-        escrowPublicKey: any,
-        token: any,
-        additionalInfo: any,
-        proof: any,
-        commitmentPrivateValue: any,
-        commitmentBytes: any,
-        idAttribIndex: any,
-        attribute: any
-    ): IEProof | null {
-        return null
     }
 }

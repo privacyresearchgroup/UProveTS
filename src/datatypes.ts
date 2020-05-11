@@ -271,17 +271,6 @@ export interface ProverFunctions {
         scopeData: ScopeData | null,
         commitmentPrivateValues: any
     ) => SerializedProof
-    verifiableEncrypt: (
-        escrowParams: any,
-        escrowPublicKey: any,
-        token: any,
-        additionalInfo: any,
-        proof: any,
-        commitmentPrivateValue: any,
-        commitmentBytes: any,
-        idAttribIndex: any,
-        attribute: any
-    ) => IDEscrowProof | null
 }
 
 // Hash
