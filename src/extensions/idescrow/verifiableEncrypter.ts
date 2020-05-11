@@ -1,8 +1,14 @@
-import { ZqField, RandomNumberGenerator, MultiplicativeGroup, IDEscrowProof } from '../datatypes'
-import { IssuerParams } from '../issuerparams'
-import { computeX, generateIdEscrowChallenge, computeTokenId, ATimesBPlusCModQ, uint8ArrayToBase64 } from '../utilities'
+import { ZqField, RandomNumberGenerator, MultiplicativeGroup, IDEscrowProof } from '../../datatypes'
+import { IssuerParams } from '../../issuerparams'
+import {
+    computeX,
+    generateIdEscrowChallenge,
+    computeTokenId,
+    ATimesBPlusCModQ,
+    uint8ArrayToBase64,
+} from '../../utilities'
 
-export class IDEscrowExtension {
+export class VerifiableEncrypter {
     private _Gq: MultiplicativeGroup
     private _Zq: ZqField
     constructor(private _ip: IssuerParams, private _rng: RandomNumberGenerator) {
