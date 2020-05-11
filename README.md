@@ -174,4 +174,4 @@ This work is licensed under GPL v3 [https://www.gnu.org/licenses/gpl-3.0.en.html
 
 ## Future Development
 
-Short term development tasks are tracked using GitHube issues. Longer term, our goal is to complete implementation of U-Prove extensions for ID escrow, range proofs, and more. We also aim to create similar, compatible SDKs for other anonymous credential systems so that developers can easily experiment with these systems and compare alternatives.
+Short term development tasks are tracked using GitHub issues. Longer term, our goal is to complete implementation of U-Prove extensions for ID escrow, range proofs, and more. We also aim to create similar, compatible SDKs for other anonymous credential systems so that developers can easily experiment with these systems and compare alternatives.
