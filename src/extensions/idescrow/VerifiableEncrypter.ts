@@ -1,4 +1,12 @@
-import { ZqField, RandomNumberGenerator, MultiplicativeGroup, IDEscrowProof } from '../../datatypes'
+import {
+    ZqField,
+    RandomNumberGenerator,
+    MultiplicativeGroup,
+    IDEscrowProof,
+    UProveToken,
+    ZqElement,
+    Attribute,
+} from '../../datatypes'
 import { IssuerParams } from '../../issuerparams'
 import {
     computeX,
@@ -7,6 +15,7 @@ import {
     ATimesBPlusCModQ,
     uint8ArrayToBase64,
 } from '../../utilities'
+import { AuditorParams } from './Auditor'
 
 export class VerifiableEncrypter {
     private _Gq: MultiplicativeGroup
@@ -16,13 +25,13 @@ export class VerifiableEncrypter {
         this._Zq = _ip.descGq.getZq()
     }
     verifiableEncrypt(
-        escrowPublicKey,
-        token,
-        additionalInfo,
-        commitmentPrivateValue,
-        commitmentBytes,
-        idAttribIndex,
-        attribute
+        escrowPublicKey: AuditorParams,
+        token: UProveToken,
+        additionalInfo: Uint8Array,
+        commitmentPrivateValue: ZqElement,
+        commitmentBytes: Uint8Array,
+        idAttribIndex: number,
+        attribute: Attribute
     ): IDEscrowProof {
         const temp = this._Gq.getIdentityElement()
         const generator = this._ip.descGq.getGenerator()
@@ -74,6 +83,7 @@ export class VerifiableEncrypter {
         const rr = ATimesBPlusCModQ(this._Zq, cNegate, r, rPrime) // rr = r' - c.r
         const rob = ATimesBPlusCModQ(this._Zq, cNegate, commitmentPrivateValue, obPrime) // ro = ob' - c.ob
 
+        // note: rXb is r_b in the spec. rOb is r_o.
         const ieProof = {
             E1: uint8ArrayToBase64(E1.toByteArrayUnsigned()),
             E2: uint8ArrayToBase64(E2.toByteArrayUnsigned()),
