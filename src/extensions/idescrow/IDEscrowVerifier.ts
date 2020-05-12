@@ -1,5 +1,5 @@
 import { MultiplicativeGroup, ZqField, IssuerParams, RandomNumberGenerator } from '../..'
-import { IDEscrowProof, GroupElement } from '../../datatypes'
+import { IDEscrowProof, GroupElement, isECGroupElement } from '../../datatypes'
 import { base64ToUint8Array, generateIdEscrowChallenge } from '../../utilities'
 import { AuditorParams } from './Auditor'
 import cryptoMath from '../../msrcrypto/cryptoMath'
@@ -13,9 +13,16 @@ export class IDEscrowVerifier {
     }
 
     private _getGroupElement(): GroupElement {
-        return this._ip.descGq.getGenerator()
+        return this._Gq.getIdentityElement()
     }
 
+    /**
+     *
+     * @param ieProof a (serialized) verifiable encryption proof with additional info
+     * @param UIDt UID of the token used to generate the proof
+     * @param Cb a group element g^xb*g1^ob that serves as a commitment to the
+     *           encrypted attribute. It is `tc` or `tildeC` in the `Prover`.
+     */
     verify(ieProof: IDEscrowProof, UIDt: Uint8Array, Cb: GroupElement): boolean {
         // these both validate that the point is really on the curve
         const E1 = this._Gq.createElementFromBytes(base64ToUint8Array(ieProof.E1))
@@ -28,6 +35,8 @@ export class IDEscrowVerifier {
         const rOb = this._Zq.createElementFromBytes(base64ToUint8Array(ieProof.ieproof.rOb))
         const c = this._Zq.createElementFromBytes(base64ToUint8Array(ieProof.ieproof.c))
 
+        const temp = this._getGroupElement()
+
         const Cbpp = this._getGroupElement()
         const g1rO = this._getGroupElement()
         const grb = this._getGroupElement()
@@ -39,8 +48,8 @@ export class IDEscrowVerifier {
         this._Gq.modexp(Cb, c, Cbpp)
         this._Gq.modexp(g, rXb, grb)
         this._Gq.modexp(g1, rOb, g1rO)
-        this._Gq.multiply(Cbpp, g1rO, Cbpp)
-        this._Gq.multiply(Cbpp, grb, Cbpp)
+        this._Gq.multiply(Cbpp, g1rO, temp)
+        this._Gq.multiply(temp, grb, Cbpp)
 
         // compute E1''
         const E1pp = this._getGroupElement()
@@ -74,5 +83,17 @@ export class IDEscrowVerifier {
         )
 
         return cryptoMath.sequenceEqual(c.toByteArrayUnsigned(), cp.toByteArrayUnsigned())
+    }
+}
+
+function pointToJson(g: GroupElement): any {
+    if (isECGroupElement(g)) {
+        return {
+            x: g.x,
+            y: g.y,
+            z: g.z,
+            isAffine: g.isAffine,
+            isInMontgomeryForm: g.isInMontgomeryForm,
+        }
     }
 }
