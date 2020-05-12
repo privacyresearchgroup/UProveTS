@@ -115,7 +115,7 @@ export class ECGroup implements MultiplicativeGroup {
     // computes result = a + b
     multiply(a: GroupElement, b: GroupElement, result: GroupElement): void {
         if (!isECGroupElement(a) || !isECGroupElement(b) || !isECGroupElement(result)) {
-            throw new Error('attempting no multiply non-EC points on an elliptic curve')
+            throw new Error('attempting to multiply non-EC points on an elliptic curve')
         } else {
             // result must be in Jacobian, Montgomery form for the mixed add
             const temp = this.curve.allocatePointStorage()
