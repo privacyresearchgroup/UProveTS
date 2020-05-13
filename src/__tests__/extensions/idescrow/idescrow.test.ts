@@ -30,12 +30,13 @@ import {
 import { IssuerSession } from '../../../issuer'
 import { ZqRNG } from '../../../testutilities/ZqRNG'
 import { InMemoryPrivateKeyContainer } from '../../../PrivateKeyContainer'
-import { uint8ArrayToBase64, computeTokenId } from '../../../utilities'
+import { uint8ArrayToBase64, computeTokenId, computeX } from '../../../utilities'
 import { Verifier } from '../../../verifier'
 import { AttributeSet } from '../../..'
 import { Auditor } from '../../../extensions/idescrow/Auditor'
 import { VerifiableEncrypter } from '../../../extensions/idescrow/VerifiableEncrypter'
 import { IDEscrowVerifier } from '../../../extensions/idescrow/IDEscrowVerifier'
+import cryptoMath from '../../../msrcrypto/cryptoMath'
 
 let totalTime: number
 totalTime = 0
@@ -256,4 +257,16 @@ test('run protocol with ID escrow', () => {
     expect(encryptionValid).toBeTruthy()
 
     // decrypt it
+    const decrypted = protocolTest.auditor.decrypt(ieProof)
+    const xb = computeX(protocolTest.Zq, protocolTest.attributes[commit - 1], protocolTest.ip.e[commit - 1])
+    const g = protocolTest.ip.descGq.getGenerator()
+    const g2xb = protocolTest.Gq.getIdentityElement()
+    protocolTest.Gq.modexp(g, xb, g2xb)
+    console.log(`verifiably decrypted`, {
+        xb: xb.toByteArrayUnsigned(),
+        Pb: decrypted.toByteArrayUnsigned(),
+        g2xb: g2xb.toByteArrayUnsigned(),
+    })
+
+    expect(cryptoMath.sequenceEqual(decrypted.toByteArrayUnsigned(), g2xb.toByteArrayUnsigned())).toBeTruthy()
 })
