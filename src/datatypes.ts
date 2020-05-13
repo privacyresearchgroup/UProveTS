@@ -186,7 +186,9 @@ export interface ThirdMessage {
 
 // Prover
 
-export type RandomNumberGenerator = any
+export interface RandomNumberGenerator {
+    getRandomZqElement: () => ZqElement
+}
 
 export interface ProverData {
     rng: RandomNumberGenerator
