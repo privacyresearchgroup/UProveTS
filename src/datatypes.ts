@@ -104,7 +104,7 @@ export interface ZqField {
     createElementFromBytes: (bs: Uint8Array | number[]) => ZqElement
     createElementFromDigits: (ds: number[]) => ZqElement
     getIdentityElement: () => ZqElement
-    createModElementFromBytes: (bs: Uint8Array) => ZqElement
+    createModElementFromBytes: (bs: Uint8Array | number[]) => ZqElement
     createElementFromInteger: (n: number) => ZqElement
     modexp: (g: ZqElement, s: ZqElement, result: ZqElement) => void
     multiply: (a: ZqElement, b: ZqElement, result: ZqElement) => void
@@ -186,7 +186,9 @@ export interface ThirdMessage {
 
 // Prover
 
-export type RandomNumberGenerator = any
+export interface RandomNumberGenerator {
+    getRandomZqElement: () => ZqElement
+}
 
 export interface ProverData {
     rng: RandomNumberGenerator
@@ -233,7 +235,7 @@ export interface Proof {
     tr?: ZqElement[]
 }
 
-export interface IEProof {
+export interface IDEscrowProof {
     E1: base64string
     E2: base64string
     info: base64string
@@ -271,17 +273,6 @@ export interface ProverFunctions {
         scopeData: ScopeData | null,
         commitmentPrivateValues: any
     ) => SerializedProof
-    verifiableEncrypt: (
-        escrowParams: any,
-        escrowPublicKey: any,
-        token: any,
-        additionalInfo: any,
-        proof: any,
-        commitmentPrivateValue: any,
-        commitmentBytes: any,
-        idAttribIndex: any,
-        attribute: any
-    ) => IEProof | null
 }
 
 // Hash

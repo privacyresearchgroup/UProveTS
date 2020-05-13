@@ -53,8 +53,13 @@ export class ECGroup implements MultiplicativeGroup {
     }
 
     // creates an element from the serialized bytes
-    createElementFromBytes(bytes: Uint8Array | number[]): GroupElement {
-        return cryptoECC.sec1EncodingFp().decodePoint(bytes, this.curve)
+    createElementFromBytes(bytes: Uint8Array | number[]): ECGroupElement {
+        const result = cryptoECC.sec1EncodingFp().decodePoint(bytes, this.curve)
+        if (!result.validate()) {
+            throw new Error('attempting to create a point that is not on the curve')
+        }
+
+        return (result as unknown) as ECGroupElement
     }
 
     createPoint(x: Uint8Array | number[], y: Uint8Array | number[]): ECGroupElement {
@@ -110,7 +115,7 @@ export class ECGroup implements MultiplicativeGroup {
     // computes result = a + b
     multiply(a: GroupElement, b: GroupElement, result: GroupElement): void {
         if (!isECGroupElement(a) || !isECGroupElement(b) || !isECGroupElement(result)) {
-            throw new Error('attempting no multiply non-EC points on an elliptic curve')
+            throw new Error('attempting to multiply non-EC points on an elliptic curve')
         } else {
             // result must be in Jacobian, Montgomery form for the mixed add
             const temp = this.curve.allocatePointStorage()

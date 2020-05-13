@@ -12,9 +12,10 @@
  */
 
 import { Hash } from './hash'
-import { Attribute, ZqField, ZqElement, UProveToken } from './datatypes'
+import { Attribute, ZqField, ZqElement, UProveToken, GroupElement, MultiplicativeGroup } from './datatypes'
 import b2a from 'btoa'
 import a2b from 'atob'
+import { IssuerParams } from './issuerparams'
 
 const atobSupport = typeof atob !== 'undefined'
 const a2bfunc = atobSupport ? atob : a2b
@@ -45,7 +46,7 @@ export function ATimesBPlusCModQ(Zq: ZqField, a: ZqElement, b: ZqElement, c: ZqE
     return result
 }
 
-export function multiModExp(Gq, bases, exponents): any {
+export function multiModExp(Gq: MultiplicativeGroup, bases: GroupElement[], exponents: ZqElement[]): GroupElement {
     if (bases.length !== exponents.length) {
         throw new Error('bases and exponents have different lengths')
     }
@@ -59,7 +60,7 @@ export function multiModExp(Gq, bases, exponents): any {
     return result
 }
 
-export function computeX(Zq, A, e): any {
+export function computeX(Zq: ZqField, A: Attribute, e: number): ZqElement {
     let x: any
     if (e === 1) {
         if (A === null) {
@@ -77,7 +78,7 @@ export function computeX(Zq, A, e): any {
     return x
 }
 
-export function computeXArray(Zq, attributes: Attribute[], e): any[] {
+export function computeXArray(Zq: ZqField, attributes: Attribute[], e: number[]): ZqElement[] {
     const n = attributes.length
     if (n !== e.length) {
         throw new Error('arguments must have the same length')
@@ -89,7 +90,7 @@ export function computeXArray(Zq, attributes: Attribute[], e): any[] {
     return x
 }
 
-export function computeXt(Zq, ip, ti): any {
+export function computeXt(Zq: ZqField, ip: IssuerParams, ti: Uint8Array): ZqElement {
     const P = ip.computeDigest()
     const H = new Hash()
     H.updateByte(1)
@@ -107,7 +108,14 @@ export function computeTokenId(token: UProveToken): Uint8Array {
     return hash.digest()
 }
 
-export function computeSigmaCPrime(Zq, h, pi, sigmaZPrime, sigmaAPrime, sigmaBPrime): any {
+export function computeSigmaCPrime(
+    Zq: ZqField,
+    h: GroupElement,
+    pi: Uint8Array,
+    sigmaZPrime: GroupElement,
+    sigmaAPrime: GroupElement,
+    sigmaBPrime: GroupElement
+): ZqElement {
     const hash = new Hash()
     hash.updateBytes(h.toByteArrayUnsigned())
     hash.updateBytes(pi)
@@ -117,7 +125,22 @@ export function computeSigmaCPrime(Zq, h, pi, sigmaZPrime, sigmaAPrime, sigmaBPr
     return Zq.createModElementFromBytes(hash.digest())
 }
 
-export function generateChallenge(Zq, issuerParam, token, a, D, disclosedX, C, tildeC, tildeA, p, ap, Ps, m, md): any {
+export function generateChallenge(
+    Zq: ZqField,
+    issuerParam,
+    token: UProveToken,
+    a: Uint8Array,
+    D: number[],
+    disclosedX,
+    C: number[],
+    tildeC: GroupElement[] | null,
+    tildeA: Uint8Array[] | null,
+    p: number,
+    ap: Uint8Array | null,
+    Ps: GroupElement | null,
+    m: Uint8Array,
+    md: Uint8Array | null
+): ZqElement {
     // cp = H(uidt, a, <D>, <{xi}_in D>, C, <{tildeCi}_in C>, <{tildeAi}_in C>, p', ap, Ps, m)
     const uidt = computeTokenId(token)
     let hash = new Hash()
@@ -143,18 +166,18 @@ export function generateChallenge(Zq, issuerParam, token, a, D, disclosedX, C, t
 }
 
 export function generateIdEscrowChallenge(
-    Zq,
-    UIDp,
-    UIDt,
-    H,
-    CbBytes,
-    E1,
-    E2,
-    CbPrime,
-    E1Prime,
-    E2Prime,
-    additionalInfo
-): any {
+    Zq: ZqField,
+    UIDp: Uint8Array,
+    UIDt: Uint8Array,
+    H: GroupElement,
+    CbBytes: Uint8Array,
+    E1: GroupElement,
+    E2: GroupElement,
+    CbPrime: GroupElement,
+    E1Prime: GroupElement,
+    E2Prime: GroupElement,
+    additionalInfo: Uint8Array
+): ZqElement {
     // H(UID_p, UID_t, H, Cxb, E1, E2, Cxb', E1', E2', additionalInfo)
     const hash = new Hash()
     hash.updateBytes(UIDp)
