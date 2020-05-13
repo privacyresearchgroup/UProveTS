@@ -46,7 +46,7 @@ export class VerifiableEncrypter {
         const Pb = this._Gq.getIdentityElement()
         this._Gq.modexp(generator, xb, Pb) // E2 = g^xb
         this._Gq.modexp(escrowPublicKey.H, r, temp) // temp = H^r
-        this._Gq.multiply(E2, temp, E2) // E2 = g^xb H^r
+        this._Gq.multiply(Pb, temp, E2) // E2 = g^xb H^r
 
         const xbPrime = this._rng.getRandomZqElement()
         const obPrime = this._rng.getRandomZqElement()
@@ -77,6 +77,18 @@ export class VerifiableEncrypter {
             E2Prime,
             additionalInfo
         )
+
+        console.log(`prover escrow challenge`, {
+            UIDt: computeTokenId(token),
+            H: escrowPublicKey.H.toByteArrayUnsigned(),
+            Cb: commitmentBytes,
+            E1: E1.toByteArrayUnsigned(),
+            E2: E2.toByteArrayUnsigned(),
+            CbPrime: CbPrime.toByteArrayUnsigned(),
+            E1Prime: E1Prime.toByteArrayUnsigned(),
+            E2Prime: E2Prime.toByteArrayUnsigned(),
+            c: c.toByteArrayUnsigned(),
+        })
         const cNegate = this._Zq.createElementFromInteger(0)
         this._Zq.subtract(this._Zq.createElementFromInteger(0), c, cNegate)
 
