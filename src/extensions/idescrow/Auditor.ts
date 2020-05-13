@@ -19,7 +19,7 @@ export class Auditor implements AuditorParams {
         this.H = Gq.getIdentityElement()
 
         const x = Zq.createElementFromBytes(_pkc.getPrivateKeyBytes())
-        Gq.modexp(_ip.g[0], x, this.H)
+        Gq.modexp(_ip.descGq.getGenerator(), x, this.H)
     }
 
     serialize(): SerializedAuditorParams {
