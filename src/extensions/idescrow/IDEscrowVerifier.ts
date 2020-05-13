@@ -73,7 +73,7 @@ export class IDEscrowVerifier {
             this._ip.uidp,
             UIDt,
             this._ap.H,
-            Cb.toByteArrayUnsigned(), // ????
+            Cb.toByteArrayUnsigned(),
             E1,
             E2,
             Cbpp,
