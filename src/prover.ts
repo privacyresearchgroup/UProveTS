@@ -306,13 +306,20 @@ export class Prover implements ProverData, ProverFunctions {
         let dIndex = 0
         let cIndex = 0
         let wpIndex = 0
-        const commitmentData: any = {}
-        if (C) {
-            commitmentData.tildeC = new Array(C.length)
-            commitmentData.tildeA = new Array(C.length)
-            commitmentData.tildeO = new Array(C.length)
-            commitmentData.tildeW = new Array(C.length)
-        }
+        const commitmentData: {
+            tildeC: GroupElement[]
+            tildeA: Uint8Array[]
+            tildeO: ZqElement[]
+            tildeW: ZqElement[]
+        } | null = C
+            ? {
+                  tildeC: new Array(C.length),
+                  tildeA: new Array(C.length),
+                  tildeO: new Array(C.length),
+                  tildeW: new Array(C.length),
+              }
+            : null
+
         for (let i = 1; i <= n; i++) {
             x[i] = computeX(this.Zq, attributes[i - 1], this.ip.e[i - 1])
 
@@ -329,7 +336,7 @@ export class Prover implements ProverData, ProverFunctions {
                     wpIndex = uIndex
                 }
 
-                if (C && C.lastIndexOf(i) >= 0) {
+                if (commitmentData && C && C.lastIndexOf(i) >= 0) {
                     // xi is committed
                     commitmentData.tildeO[cIndex] = this.rng.getRandomZqElement()
                     commitmentData.tildeW[cIndex] = this.rng.getRandomZqElement()
@@ -345,7 +352,7 @@ export class Prover implements ProverData, ProverFunctions {
                 uIndex++
             }
         }
-        x[t] = computeXt(this.Zq, this.ip, token.ti) // xt
+        x[t] = computeXt(this.Zq, this.ip, token.ti!) // xt
         const aInput = multiModExp(this.Gq, bases, w)
 
         const hash = new Hash()
@@ -380,8 +387,8 @@ export class Prover implements ProverData, ProverFunctions {
             D,
             disclosedX,
             C,
-            commitmentData.tildeC,
-            commitmentData.tildeA,
+            commitmentData?.tildeC || null,
+            commitmentData?.tildeA || null,
             scopeData ? scopeData.p : 0,
             ap,
             Ps,
@@ -408,10 +415,13 @@ export class Prover implements ProverData, ProverFunctions {
                 uIndex++
             }
         }
-        if (C) {
-            commitmentData.tildeR = new Array(C.length)
+        const serializedCommitmentData: any = {}
+        if (commitmentData && C) {
+            serializedCommitmentData.tildeR = new Array(C.length)
+            serializedCommitmentData.tildeC = new Array(C.length)
+            serializedCommitmentData.tildeA = new Array(C.length)
             for (let i = 0; i < C.length; i++) {
-                commitmentData.tildeR[i] = uint8ArrayToBase64(
+                serializedCommitmentData.tildeR[i] = uint8ArrayToBase64(
                     ATimesBPlusCModQ(
                         this.Zq,
                         cNegate,
@@ -419,8 +429,8 @@ export class Prover implements ProverData, ProverFunctions {
                         commitmentData.tildeW[i]
                     ).toByteArrayUnsigned()
                 )
-                commitmentData.tildeC[i] = uint8ArrayToBase64(commitmentData.tildeC[i].toByteArrayUnsigned())
-                commitmentData.tildeA[i] = uint8ArrayToBase64(commitmentData.tildeA[i])
+                serializedCommitmentData.tildeC[i] = uint8ArrayToBase64(commitmentData.tildeC[i].toByteArrayUnsigned())
+                serializedCommitmentData.tildeA[i] = uint8ArrayToBase64(commitmentData.tildeA[i])
             }
         }
 
@@ -434,11 +444,11 @@ export class Prover implements ProverData, ProverFunctions {
             proof.Ps = uint8ArrayToBase64(Ps!.toByteArrayUnsigned())
         }
         if (C) {
-            proof.tc = commitmentData.tildeC
-            proof.ta = commitmentData.tildeA
-            proof.tr = commitmentData.tildeR
+            proof.tc = serializedCommitmentData.tildeC
+            proof.ta = serializedCommitmentData.tildeA
+            proof.tr = serializedCommitmentData.tildeR
         }
-        if (commitmentPrivateValues && commitmentData.tildeO) {
+        if (commitmentPrivateValues && commitmentData?.tildeO) {
             commitmentPrivateValues.tildeO = commitmentData.tildeO
         }
         return proof

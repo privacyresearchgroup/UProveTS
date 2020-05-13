@@ -130,13 +130,13 @@ export class Verifier {
             D,
             disclosedX,
             C,
-            proof.tc,
-            proof.ta,
+            proof.tc || null,
+            proof.ta || null,
             scopeData?.p || 0,
             proof.ap || null,
             proof.Ps || null,
             m,
-            md
+            md || null
         )
         const attributesValid = this.verifyDisclosedAttributes(proof, token, c, D)
         if (!attributesValid) {
@@ -173,7 +173,7 @@ export class Verifier {
         const dBases = D.map((d: number) => this.ip.g[d])
         const dPart = multiModExp(this.Gq, dBases, disclosedX)
 
-        const xt = computeXt(this.Zq, this.ip, token.ti)
+        const xt = computeXt(this.Zq, this.ip, token.ti!)
         const gtPart = this.Gq.getIdentityElement()
 
         this.Gq.modexp(this.ip.g[this.ip.t], xt, gtPart)

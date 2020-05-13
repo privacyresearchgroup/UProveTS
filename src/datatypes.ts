@@ -104,7 +104,7 @@ export interface ZqField {
     createElementFromBytes: (bs: Uint8Array | number[]) => ZqElement
     createElementFromDigits: (ds: number[]) => ZqElement
     getIdentityElement: () => ZqElement
-    createModElementFromBytes: (bs: Uint8Array) => ZqElement
+    createModElementFromBytes: (bs: Uint8Array | number[]) => ZqElement
     createElementFromInteger: (n: number) => ZqElement
     modexp: (g: ZqElement, s: ZqElement, result: ZqElement) => void
     multiply: (a: ZqElement, b: ZqElement, result: ZqElement) => void
