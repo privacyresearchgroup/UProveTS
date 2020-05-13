@@ -43,7 +43,8 @@ export class VerifiableEncrypter {
 
         const xb = computeX(this._Zq, attribute, this._ip.e[idAttribIndex - 1])
         const E2 = this._Gq.getIdentityElement()
-        this._Gq.modexp(generator, xb, E2) // E2 = g^xb
+        const Pb = this._Gq.getIdentityElement()
+        this._Gq.modexp(generator, xb, Pb) // E2 = g^xb
         this._Gq.modexp(escrowPublicKey.H, r, temp) // temp = H^r
         this._Gq.multiply(E2, temp, E2) // E2 = g^xb H^r
 
