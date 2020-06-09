@@ -31,7 +31,7 @@ Significant changes include:
 - Port to TypeScript
 - Addition of components for issuers and verifiers with unit tests
 - Use of jest for test automation
-- Integration tests against a [sample issuer web service](https://github.com/rolfeschmidt/uproveissuer)
+- Integration tests against a [sample issuer web service](https://github.com/privacyresearchgroup/uproveissuer)
 
 ## Goals
 
@@ -45,11 +45,19 @@ To install with yarn, simply run
 yarn install @rolfe/uprovets
 ```
 
-For detailed example usage, look at [`__tests__/full-protocol.ts`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/__tests__/full-protocol.test.ts) and[`__tests__/integration-test.ts`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/__tests__/integration.test.ts). To execute and run the integration tests you will need to deploy an issuing server. A sample issuer is available [here](https://github.com/rolfeschmidt/uproveissuer).
+For detailed example usage, look at [`__tests__/full-protocol.ts`](https://github.com/privacyresearchgroup/UProveTS/blob/master/src/__tests__/full-protocol.test.ts) and[`__tests__/integration-test.ts`](https://github.com/privacyresearchgroup/UProveTS/blob/master/src/__tests__/integration.test.ts). To execute and run the integration tests you will need to deploy an issuing server. A sample issuer is available [here](https://github.com/privacyresearchgroup/uproveissuer).
+
+To run integration tests against an issuer service, you will need to add a file `src/__tests__/TestVectors/apidata.txt` with api configuration information in this form:
+
+```
+// api configuration data
+uproveissuer = <UProve Issuer ID>
+url = <URL for issuer endpoint>
+```
 
 ### Key Components
 
-All users of the U-Prove system will need access to the issuer's public parameters. These are captured in the [`IssuerParams`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/issuerparams.ts) class which will typically be instantiated as follows
+All users of the U-Prove system will need access to the issuer's public parameters. These are captured in the [`IssuerParams`](https://github.com/privacyresearchgroup/UProveTS/blob/master/src/issuerparams.ts) class which will typically be instantiated as follows
 
 ```
 // The serialized issuer parameters will be obtained from a public registry or directly from the issuer
@@ -58,9 +66,9 @@ const serializedIssuerParams = {...}
 const ip = IssuerParams.ParseIssuerParams(serializedIssuerParams)
 ```
 
-An [`IssuerSession`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/issuer.ts) is used when implementing an issuer to take part in the U-Prove protocol. Creating an `IssuerSession` requires a `PrivateKeyContainer` which you will provide. Look at our [sample issuer web service](https://github.com/rolfeschmidt/uproveissuer) for a detailed example.
+An [`IssuerSession`](https://github.com/privacyresearchgroup/UProveTS/blob/master/src/issuer.ts) is used when implementing an issuer to take part in the U-Prove protocol. Creating an `IssuerSession` requires a `PrivateKeyContainer` which you will provide. Look at our [sample issuer web service](https://github.com/privacyresearchgroup/uproveissuer) for a detailed example.
 
-A [`Prover`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/prover.ts) performs the functions of a prover in the U-Prove protocol - sending messages to and receiving messages from the issuer, generating tokens, and generating attribute presentation proofs. Here is an example, adapted from the unit tests, of a prover interacting with an issuer to generate tokens
+A [`Prover`](https://github.com/privacyresearchgroup/UProveTS/blob/master/src/prover.ts) performs the functions of a prover in the U-Prove protocol - sending messages to and receiving messages from the issuer, generating tokens, and generating attribute presentation proofs. Here is an example, adapted from the unit tests, of a prover interacting with an issuer to generate tokens
 
 ```
 
@@ -112,7 +120,7 @@ A prover also generates presentation proofs for relying parties or verifiers. In
     )
 ```
 
-Finally the [`Verifier`](https://github.com/rolfeschmidt/UProveTS/blob/master/src/verifier.ts) is the third core component of this SDK. The verifier receives proofs from a prover and can validate the issuer signature ad validate the proof.
+Finally the [`Verifier`](https://github.com/privacyresearchgroup/UProveTS/blob/master/src/verifier.ts) is the third core component of this SDK. The verifier receives proofs from a prover and can validate the issuer signature ad validate the proof.
 
 ```
 
