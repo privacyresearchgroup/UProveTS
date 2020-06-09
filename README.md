@@ -51,7 +51,7 @@ To run integration tests against an issuer service, you will need to add a file 
 
 ```
 // api configuration data
-uproveissuer = <UProve Issuer ID>
+uproveissuer = <UProve Issuer API Key>
 url = <URL for issuer endpoint>
 ```
 
