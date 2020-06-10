@@ -1,3 +1,4 @@
+import { simpleCurve25519 } from '@rolfe/pr-math'
 import { ECGroupElement, ZqElement, ScopeData } from '..'
 import cryptoMath from '../msrcrypto/cryptoMath'
 import ECP256 from '../EcP256'
@@ -214,3 +215,23 @@ function modPointRep(n: ZqElement): any {
         digits: n.m_digits,
     }
 }
+
+test(`curve25519 test`, () => {
+    // quick sanity check of imported curve
+    // order of generator: 2^252 + 27742317777372353535851937790883648493
+    // 7237005577332262213973186563042994240857116359379907606001950938285454250989
+    // 0x1000000000000000000000000000000014DEF9DEA2F79CD65812631A5CF5D3ED
+    const gOrd = 'EAAAAAAAAAAAAAAAAAAAABTe+d6i95zWWBJjGlz10+0='
+
+    const curve = simpleCurve25519
+    const ord = curve.field.fromBase64(gOrd)
+    const ordMinusOne = curve.field.fromInteger(1)
+    curve.field.negate(ordMinusOne, ordMinusOne)
+    curve.field.add(ord, ordMinusOne, ordMinusOne)
+    const g = curve.generator.clone()
+    const q = curve.generator.clone()
+    curve.scalarMultiply(ordMinusOne, g, q)
+    console.log({ ord: ord.digits, gx: g.x.digits, qx: q.x.digits, gy: g.y.digits, qy: q.y.digits })
+    expect(cryptoMath.sequenceEqual(g.x.digits, q.x.digits)).toBeTruthy()
+    expect(cryptoMath.sequenceEqual(g.y.digits, q.y.digits)).toBeFalsy()
+})

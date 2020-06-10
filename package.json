@@ -1,8 +1,9 @@
 {
   "name": "@rolfe/uprovets",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "TypeScript library for the UProve anonymous credential system",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "repository": "https://github.com/privacyresearchgroup/UProveTS.git",
   "author": "Rolfe Schmidt <rolfe@alumni.princeton.edu>",
   "license": "GPL-3.0-only",
@@ -31,6 +32,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
+    "@rolfe/pr-math": "^0.0.1",
     "@types/atob": "^2.1.2",
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
