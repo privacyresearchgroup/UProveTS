@@ -32,7 +32,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "@rolfe/pr-math": "^0.0.3",
+    "@rolfe/pr-math": "^0.0.6",
     "@types/atob": "^2.1.2",
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
