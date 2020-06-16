@@ -3,6 +3,7 @@ import { ECGroupElement, ZqElement, ScopeData } from '..'
 import cryptoMath from '../msrcrypto/cryptoMath'
 import ECP256 from '../EcP256'
 import cryptoECC from '../msrcrypto/cryptoECC'
+import { PrimeFieldWrapper, ResidueWrapper } from '../pr-math-wrappers/prime-field'
 
 const chatty = false
 test('generate scope elt', () => {
@@ -234,4 +235,18 @@ test(`curve25519 test`, () => {
     console.log({ ord: ord.digits, gx: g.x.digits, qx: q.x.digits, gy: g.y.digits, qy: q.y.digits })
     expect(cryptoMath.sequenceEqual(g.x.digits, q.x.digits)).toBeTruthy()
     expect(cryptoMath.sequenceEqual(g.y.digits, q.y.digits)).toBeFalsy()
+})
+
+test(`pr-math wrapper test`, () => {
+    const curve = simpleCurve25519
+    const { field } = curve
+    const Zq = new PrimeFieldWrapper(field)
+
+    const one = Zq.getIdentityElement() as ResidueWrapper
+    const two = Zq.createElementFromInteger(2) as ResidueWrapper
+    expect(two.residue.digits[0]).toBe(2)
+
+    const negOne = Zq.createElementFromInteger(0)
+    Zq.subtract(one, two, negOne)
+    expect(negOne.m_digits[0]).toBe((1 << 24) - 20)
 })
