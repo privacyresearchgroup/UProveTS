@@ -380,10 +380,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
-"@rolfe/pr-math@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@rolfe/pr-math/-/pr-math-0.0.6.tgz#87aba7032f6cf812435a65e505590cde73620604"
-  integrity sha512-qtQrt3sm3/ewvkwPwSGe/CaOLow898ynI0yq6dHiwlSMcsRL8XsKOvL+0lz1Gs10hgmarDGaovu+JuNJofBwlw==
+"@rolfe/pr-math@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@rolfe/pr-math/-/pr-math-0.0.9.tgz#2c3b443c3357eb605cbd736fa39bf366431fe936"
+  integrity sha512-3MM1HbnXt7aq6dOVjrJDEr99dnNnJlrOTImKybsTGUIGKGOjhUhEPLLBIEUOk6zAm698aoBHjYJC3x+ZC6txKQ==
   dependencies:
     js-base64 "^2.5.2"
 
