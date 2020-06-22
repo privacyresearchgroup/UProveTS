@@ -68,7 +68,10 @@ export class StringAttribute implements DecoratedAttribute {
 
         const valueLength = arr[2 + nameLength]
         const valueBytes = arr.slice(3 + nameLength)
-        const value = String.fromCharCode(...valueBytes)
+        let value = '' // String.fromCharCode(...valueBytes)
+        for (const byte of valueBytes) {
+            value += String.fromCharCode(byte)
+        }
         return new StringAttribute(name, value)
     }
 }
