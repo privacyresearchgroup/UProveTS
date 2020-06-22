@@ -25,7 +25,12 @@ export function uint8ArrayToBase64(bytes: Uint8Array | number[]): string {
     if (!Array.isArray(bytes)) {
         bytes = Array.from(bytes)
     }
-    return b2a(String.fromCharCode.apply(null, bytes))
+
+    let value = '' // String.fromCharCode(...valueBytes)
+    for (const byte of bytes) {
+        value += String.fromCharCode(byte)
+    }
+    return b2a(value)
 }
 
 export function base64ToArray(b64String: string): number[] {
