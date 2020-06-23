@@ -13,13 +13,8 @@
 
 import { Hash } from './hash'
 import { Attribute, ZqField, ZqElement, UProveToken, GroupElement, MultiplicativeGroup } from './datatypes'
-import b2a from 'btoa'
-import a2b from 'atob'
 import { IssuerParams } from './issuerparams'
-
-const atobSupport = typeof atob !== 'undefined'
-const a2bfunc = atobSupport ? atob : a2b
-console.log(`atobSupport: ${atobSupport}`)
+import { Base64 } from 'js-base64'
 
 export function uint8ArrayToBase64(bytes: Uint8Array | number[]): string {
     if (!Array.isArray(bytes)) {
@@ -30,11 +25,11 @@ export function uint8ArrayToBase64(bytes: Uint8Array | number[]): string {
     for (const byte of bytes) {
         value += String.fromCharCode(byte)
     }
-    return b2a(value)
+    return Base64.btoa(value)
 }
 
 export function base64ToArray(b64String: string): number[] {
-    return a2bfunc(b64String)
+    return Base64.atob(b64String)
         .split('')
         .map((c: string) => c.charCodeAt(0))
 }
