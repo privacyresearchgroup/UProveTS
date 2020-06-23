@@ -20,7 +20,6 @@
     "postversion": "git push && git push --tags"
   },
   "devDependencies": {
-    "@types/btoa": "^1.2.3",
     "@types/jest": "^25.1.4",
     "@types/js-base64": "^2.3.1",
     "@types/lodash": "^4.14.149",
@@ -34,9 +33,6 @@
   },
   "dependencies": {
     "@rolfe/pr-math": "^0.0.9",
-    "@types/atob": "^2.1.2",
-    "atob": "^2.1.2",
-    "btoa": "^1.2.1",
     "js-base64": "^2.6.1",
     "lodash": "^4.17.15",
     "node-fetch": "^2.6.0"
