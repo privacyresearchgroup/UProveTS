@@ -380,12 +380,12 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
-"@rolfe/pr-math@^0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@rolfe/pr-math/-/pr-math-0.0.9.tgz#2c3b443c3357eb605cbd736fa39bf366431fe936"
-  integrity sha512-3MM1HbnXt7aq6dOVjrJDEr99dnNnJlrOTImKybsTGUIGKGOjhUhEPLLBIEUOk6zAm698aoBHjYJC3x+ZC6txKQ==
+"@rolfe/pr-math@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@rolfe/pr-math/-/pr-math-0.0.10.tgz#113e5ed58c7fa8547d64b055d11a688fac091e41"
+  integrity sha512-YAWpcUMNzaMfYwPlIwtqaRJ9cMa2QymA3L7Bky3Luza2p/atvxWOCbT+BB8ACtoiSpt9h3b/hiWrEKydo2ztdw==
   dependencies:
-    js-base64 "^2.5.2"
+    base64-js "^1.3.1"
 
 "@sinonjs/commons@^1.7.0":
   version "1.7.1"
@@ -427,6 +427,11 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
+"@types/base64-js@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@types/base64-js/-/base64-js-1.3.0.tgz#c939fdba49846861caf5a246b165dbf5698a317c"
+  integrity sha512-ZmI0sZGAUNXUfMWboWwi4LcfpoVUYldyN6Oe0oJ5cCsHDU/LlRq8nQKPXhYLOx36QYSW9bNIb1vvRrD6K7Llgw==
+
 "@types/color-name@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
@@ -459,11 +464,6 @@
   dependencies:
     jest-diff "^25.1.0"
     pretty-format "^25.1.0"
-
-"@types/js-base64@^2.3.1":
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/@types/js-base64/-/js-base64-2.3.1.tgz#c39f14f129408a3d96a1105a650d8b2b6eeb4168"
-  integrity sha512-4RKbhIDGC87s4EBy2Cp2/5S2O6kmCRcZnD5KRCq1q9z2GhBte1+BdsfVKCpG8yKpDGNyEE2G6IqFIh6W2YwWPA==
 
 "@types/lodash@^4.14.149":
   version "4.14.149"
@@ -701,6 +701,11 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
   integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
+
+base64-js@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.3.1.tgz#58ece8cb75dd07e71ed08c736abc5fac4dbf8df1"
+  integrity sha512-mLQ4i2QO1ytvGWFWmcngKO//JXAQueZvwEKtjgQFM4jIK0kU+ytMfplL8j+n5mspOfjHwoAg+9yhb7BwAHm36g==
 
 base@^0.11.1:
   version "0.11.2"
@@ -2054,16 +2059,6 @@ jest@^25.2.6:
     "@jest/core" "^25.2.6"
     import-local "^3.0.2"
     jest-cli "^25.2.6"
-
-js-base64@^2.5.2:
-  version "2.5.2"
-  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.5.2.tgz#313b6274dda718f714d00b3330bbae6e38e90209"
-  integrity sha512-Vg8czh0Q7sFBSUMWWArX/miJeBWYBPpdU/3M/DKSaekLMqrqVPaedp+5mZhie/r0lgrcaYBfwXatEew6gwgiQQ==
-
-js-base64@^2.6.1:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.6.1.tgz#c328374225d2e65569791ded73c258e2c59334c7"
-  integrity sha512-G5x2saUTupU9D/xBY9snJs3TxvwX8EkpLFiYlPpDt/VmMHOXprnSU1nxiTmFbijCX4BLF/cMRIfAcC5BiMYgFQ==
 
 js-tokens@^4.0.0:
   version "4.0.0"
