@@ -112,10 +112,10 @@ class FullProtocolUnitTest {
         for (let i = 1; i <= this._numAttributes; i++) {
             attributes[i - 1] = readHexString(this._vectors['A' + i])
         }
-        const bigArray = new Array(200000).fill(88)
-        const prefix = [0, 1, 88, 20000]
-        const bigAttr = [...prefix, ...bigArray]
-        attributes[4] = bigAttr
+        // const bigArray = new Array(200000).fill(88)
+        // const prefix = [0, 1, 88, 20000]
+        // const bigAttr = [...prefix, ...bigArray]
+        // attributes[4] = bigAttr
         return attributes
     }
 }
