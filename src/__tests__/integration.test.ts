@@ -20,7 +20,7 @@ import { ZqRNG } from '../testutilities/ZqRNG'
 import { base64ToUint8Array, uint8ArrayToBase64 } from '../utilities'
 import { readFileDataInDictionary } from '../testutilities/utilities'
 import { Verifier } from '../verifier'
-import { AttributeSet } from '../AttributeSet'
+import { AttributeSet, StringAttribute } from '../AttributeSet'
 
 const apidata = readFileDataInDictionary('apidata.txt')
 const apikey = apidata.uproveissuer

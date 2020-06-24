@@ -6,7 +6,7 @@
  *  Licensed under GPL v3 (https://www.gnu.org/licenses/gpl-3.0.en.html)
  *
  */
-import { AttributeSet, AttributeType } from '../AttributeSet'
+import { AttributeSet, AttributeType, StringAttribute } from '../AttributeSet'
 
 const testjson = {
     aBool: false,
@@ -33,4 +33,12 @@ test('to and from JSON', () => {
 
     expect(as.indexOfAttribute('motto')).toBe(2)
     expect(as2.indexOfAttribute('num')).toBe(3)
+})
+
+test(`encode/decode large strings`, () => {
+    const bigArray = new Array(200000).fill(88)
+    const prefix = [0, 1, 88, 20000]
+    const bigAttr = [...prefix, ...bigArray]
+    const strattr = StringAttribute.decode(bigAttr)
+    console.log({ strattr: { name: strattr.name, val: strattr.value.slice(0, 20), len: strattr.value.length } })
 })
