@@ -439,11 +439,13 @@ function MsrcryptoMath() {
     /// <param name="right" type="Digits">The right array.</param>
     /// <returns type="Boolean">True if both arrays are the same.</returns>
     if (left.length !== right.length) {
+      console.log(`lengths not equal`, { ll: left.length, rl: right.length })
       return false
     }
 
     for (var i = 0; i < left.length; i += 1) {
       if (left[i] !== right[i]) {
+        console.log(`digits not equal`, { i, l: left[i], r: right[i] })
         return false
       }
     }

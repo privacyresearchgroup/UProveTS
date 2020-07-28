@@ -45,6 +45,8 @@ import {
 } from './utilities'
 import { Hash } from './hash'
 import { pseudoRandomBytes } from 'crypto'
+import { MontgomeryPointWrapper } from './Curve25519'
+import { ResidueWrapper } from './pr-math-wrappers/prime-field'
 
 export class Prover implements ProverData, ProverFunctions {
     rng: RandomNumberGenerator
@@ -57,6 +59,7 @@ export class Prover implements ProverData, ProverFunctions {
     secondMsg: SerializedSecondMessage
     h?: GroupElement[]
     alphaInverse?: ZqElement[]
+    beta1?: ZqElement
     beta2?: ZqElement[]
     sigmaZPrime?: GroupElement[]
     sigmaCPrime?: ZqElement[]
@@ -96,13 +99,20 @@ export class Prover implements ProverData, ProverFunctions {
         }
 
         // Prover input
-        let gamma
+        let gamma: GroupElement
         if (!externalGamma) {
             const x = computeXArray(this.Zq, attributes, this.ip.e)
             x.unshift(this.Zq.createElementFromInteger(1)) // exponent 1 for g0
             x.push(computeXt(this.Zq, this.ip, ti))
             // compute gamma = g0 * g1^x1 * ... * gn^xn * gt^xt
             gamma = multiModExp(this.Gq, this.ip.g, x)
+            // console.log({
+            //     proverGamma: {
+            //         x: (gamma as MontgomeryPointWrapper).montPoint.x.digits,
+            //         y: (gamma as MontgomeryPointWrapper).montPoint.y.digits,
+            //         z: (gamma as MontgomeryPointWrapper).montPoint.z.digits,
+            //     },
+            // })
         } else {
             gamma = this.Gq.createElementFromBytes(externalGamma)
         }
@@ -112,6 +122,20 @@ export class Prover implements ProverData, ProverFunctions {
             const alpha = this.rng.getRandomZqElement()
             const beta1 = this.rng.getRandomZqElement()
             this.beta2[i] = this.rng.getRandomZqElement()
+
+            const ares = alpha as ResidueWrapper
+            const b1res = beta1 as ResidueWrapper
+            const b2res = this.beta2[i] as ResidueWrapper
+
+            console.log({
+                alpha: ares.m_digits,
+                beta1: b1res.m_digits,
+                beta2: b2res.m_digits,
+                alphaMod: ares.residue.group.modulus.digits,
+                b1Mod: ares.residue.group.modulus.digits,
+                b2Mod: ares.residue.group.modulus.digits,
+            })
+            this.beta1 = beta1
 
             // compute h = gamma^alpha
             this.h[i] = this.Gq.getIdentityElement()
@@ -162,6 +186,7 @@ export class Prover implements ProverData, ProverFunctions {
                 this.Gq.modexp(temp, this.sigmaCPrime[i], temp)
                 this.Gq.multiply(value, temp, value)
                 this.tokenValidationValue![i] = value
+                console.log({ validation: this.tokenValidationValue![i].toByteArrayUnsigned() })
             }
         }
 
@@ -236,6 +261,11 @@ export class Prover implements ProverData, ProverFunctions {
                 this.Gq.multiply(this.ip.descGq.getGenerator(), this.h![i], temp)
                 this.Gq.modexp(temp, sigmaRPrime, temp)
                 if (!this.tokenValidationValue[i].equals(temp)) {
+                    console.log({
+                        tokenValidationVal: (this.tokenValidationValue![i] as MontgomeryPointWrapper).montPoint.x
+                            .digits,
+                        temp: (temp as MontgomeryPointWrapper).montPoint.x.digits,
+                    })
                     throw new Error(`invalid signature for token ${i}`)
                 }
             }

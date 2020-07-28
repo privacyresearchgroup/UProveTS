@@ -41,16 +41,7 @@ import {
 } from '@rolfe/pr-math'
 
 import cryptoMath, { DIGIT_BITS } from './msrcrypto/cryptoMath'
-import {
-    HashFunctions,
-    MultiplicativeGroup,
-    DLGroup,
-    GroupElement,
-    ECGroupElement,
-    ZqElement,
-    byte,
-    ZqField,
-} from './datatypes'
+import { HashFunctions, MultiplicativeGroup, DLGroup, GroupElement, ZqElement, ZqField } from './datatypes'
 import { Hash } from './hash'
 import { ResidueWrapper, PrimeFieldWrapper } from './pr-math-wrappers/prime-field'
 
@@ -62,13 +53,22 @@ export class MontgomeryPointWrapper implements GroupElement {
 
     equals(g: GroupElement): boolean {
         if (!isWrappedMontgomeryPoint(g)) {
+            console.log(`NOT a wrapped montgomery point!`, { g })
             return false
         }
         const { x, y, z } = g.montPoint
         // TODO: check projective equality???
+        // console.log({
+        //     x: x.digits,
+        //     xP: this.montPoint.x.digits,
+        //     y: y.digits,
+        //     yP: this.montPoint.y.digits,
+        //     z: z.digits,
+        //     zP: this.montPoint.z.digits,
+        // })
         return (
             cryptoMath.sequenceEqual(x.digits, this.montPoint.x.digits) &&
-            cryptoMath.sequenceEqual(y.digits, this.montPoint.x.digits) &&
+            cryptoMath.sequenceEqual(y.digits, this.montPoint.y.digits) &&
             cryptoMath.sequenceEqual(z.digits, this.montPoint.z.digits)
         )
     }
@@ -115,11 +115,12 @@ export class Montgomery25519Group implements MultiplicativeGroup {
     curve: MontgomeryCurve
     ladder: MontgomeryLadder
     ecOperator: any
-    Zq = new PrimeFieldWrapper(orderfield)
+    Zq: PrimeFieldWrapper // = new PrimeFieldWrapper(orderfield)
 
     constructor(curve: MontgomeryCurve) {
         this.curve = curve
         this.ladder = new MontgomeryLadder(curve)
+        this.Zq = new PrimeFieldWrapper(orderfield) // new PrimeFieldWrapper(curve.field)
     }
     // allocates an element to store some computation results
     getIdentityElement(): MontgomeryPointWrapper {
@@ -168,9 +169,15 @@ export class Montgomery25519Group implements MultiplicativeGroup {
         // scalar multiplication
         const rslt = this.ladder.scalarMultiply(wscalar.residue, wpoint.montPoint)
 
+        // const rslt = this.curve.zero.clone() as SimpleMontgomeryCurvePoint
+        // this.curve.scalarMultiply(wscalar.residue, wpoint.montPoint, rslt)
         copyResidueTo(rslt.x, wresult.montPoint.x)
         copyResidueTo(rslt.y, wresult.montPoint.y)
         copyResidueTo(rslt.z, wresult.montPoint.z)
+
+        if (!simpleCurve25519.validateCoordinates(wresult.montPoint.x, wresult.montPoint.y, wresult.montPoint.z)) {
+            throw new Error(`point result not on curve!`)
+        }
     }
 
     // computes result = a + b
@@ -186,7 +193,17 @@ export class Montgomery25519Group implements MultiplicativeGroup {
             console.error(`wrong curve`, { curve: this.curve, result, a, b })
             throw new Error('multiplying wrong type of GroupElement on elliptic curve')
         }
-        this.curve.add(wa.montPoint, wb.montPoint, wresult.montPoint)
+        if (!simpleCurve25519.validateCoordinates(wa.montPoint.x, wa.montPoint.y, wa.montPoint.z)) {
+            throw new Error(`point a not on curve!`)
+        }
+        if (!simpleCurve25519.validateCoordinates(wb.montPoint.x, wb.montPoint.y, wb.montPoint.z)) {
+            throw new Error(`point b not on curve!`)
+        }
+        this.curve.add(wa.montPoint.clone(), wb.montPoint.clone(), wresult.montPoint)
+
+        if (!simpleCurve25519.validateCoordinates(wresult.montPoint.x, wresult.montPoint.y, wresult.montPoint.z)) {
+            throw new Error(`point result not on curve!`)
+        }
     }
 
     getZq(): ZqField {
@@ -267,15 +284,7 @@ class Curve25519Object implements DLGroup {
         return this.Zp
     }
 
-    // This one is for the order of the group
-    // order of generator: 2^252 + 27742317777372353535851937790883648493
-    // 7237005577332262213973186563042994240857116359379907606001950938285454250989
-    // 0x1000000000000000000000000000000014DEF9DEA2F79CD65812631A5CF5D3ED
-    gOrdb64 = 'EAAAAAAAAAAAAAAAAAAAABTe+d6i95zWWBJjGlz10+0='
-    gOrd = simpleCurve25519.field.fromBase64(this.gOrdb64)
-    orderfield = new StandardPrimeField({ digits: this.gOrd.digits, digitWidth: DIGIT_BITS })
     Zq = this.Gq.Zq
-    // cryptoMath.IntegerGroup(Uint8Array.from(cryptoMath.digitsToBytes(this.p256.order)))
     getZq(): ZqField {
         return this.Zq
     }
@@ -293,7 +302,7 @@ class Curve25519Object implements DLGroup {
         hash.updateListOfBytes(digitsToBytes(simpleCurve25519.weierstrassB.digits))
         hash.updateListOfBytes(simpleCurve25519.generator.toBytes())
 
-        hash.updateListOfBytes(base64ToArray(this.gOrdb64))
+        hash.updateListOfBytes(base64ToArray(gOrdb64))
         hash.updateListOfBytes([8]) // cofactor is 8
     }
 

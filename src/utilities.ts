@@ -75,7 +75,7 @@ export function computeX(Zq: ZqField, A: Attribute, e: number): ZqElement {
 export function computeXArray(Zq: ZqField, attributes: Attribute[], e: number[]): ZqElement[] {
     const n = attributes.length
     if (n !== e.length) {
-        throw new Error('arguments must have the same length')
+        throw new Error(`arguments must have the same length. n: ${n}, e: ${e.length}`)
     }
     const x = new Array(n)
     for (let i = 0; i < n; i++) {
@@ -116,6 +116,9 @@ export function computeSigmaCPrime(
     hash.updateBytes(sigmaZPrime.toByteArrayUnsigned())
     hash.updateBytes(sigmaAPrime.toByteArrayUnsigned())
     hash.updateBytes(sigmaBPrime.toByteArrayUnsigned())
+    console.log(`computeSigmaCPrime`, {
+        sbp: sigmaBPrime.toByteArrayUnsigned(),
+    })
     return Zq.createModElementFromBytes(hash.digest())
 }
 

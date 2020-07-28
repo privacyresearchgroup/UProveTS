@@ -36,6 +36,8 @@ import {
 } from './utilities'
 import { PrivateKeyContainer } from './PrivateKeyContainer'
 import { ZqRNG } from './testutilities/ZqRNG'
+import { SimpleMontgomeryCurvePoint } from '@rolfe/pr-math'
+import { MontgomeryPointWrapper } from './Curve25519'
 
 interface PartialFirstMessage {
     sa: GroupElement
@@ -81,6 +83,7 @@ export class IssuerSession {
         this._w = Array(this._numTokens)
         for (let i = 0; i < this._numTokens; ++i) {
             this._w[i] = rng.getRandomZqElement()
+            console.log({ i, w: this._w[i].m_digits })
         }
         this.Gq = ip.descGq.getGq()
         this.Zq = ip.descGq.getZq()
@@ -96,6 +99,10 @@ export class IssuerSession {
 
     setW(w: ZqElement[]): void {
         this._w = w
+    }
+
+    get state(): { [k: string]: any } {
+        return { w: this._w, gamma: this._gamma }
     }
 
     private _prepareFirstMessages(): void {
@@ -133,6 +140,13 @@ export class IssuerSession {
         x.push(computeXt(this.Zq, this.ip, this.ti))
         // compute gamma = g0 * g1^x1 * ... * gn^xn * gt^xt
         const gamma = multiModExp(this.Gq, this.ip.g, x)
+        // console.log({
+        //     issuerGamma: {
+        //         x: (gamma as MontgomeryPointWrapper).montPoint.x.digits,
+        //         y: (gamma as MontgomeryPointWrapper).montPoint.y.digits,
+        //         z: (gamma as MontgomeryPointWrapper).montPoint.z.digits,
+        //     },
+        // })
         return gamma
     }
 

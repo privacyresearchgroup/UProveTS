@@ -99,7 +99,7 @@ test('test full proof', async () => {
         pi,
         null,
         ip.ParseFirstMessage(firstMessage),
-        true
+        false
     )
     const serializedThirdMessage = await completeSession(id, secondMessage)
     const thirdMessage = ip.ParseThirdMessage(serializedThirdMessage)

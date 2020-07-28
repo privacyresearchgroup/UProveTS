@@ -28,6 +28,7 @@ import { Hash } from './hash'
 import { base64ToUint8Array, base64ToArray, uint8ArrayToBase64 } from './utilities'
 import L2048N256 from './SubgroupL2048N256'
 import ECP256 from './EcP256'
+import Curve25519 from './Curve25519'
 
 export class IssuerParams implements IssuerParamsData, IssuerParamsFunctions {
     uidp: Uint8Array
@@ -157,17 +158,26 @@ export class IssuerParams implements IssuerParamsData, IssuerParamsFunctions {
                 throw new Error('missing field')
             }
 
+            const e = base64ToArray(ipObj.e)
+            const numAttribs = e.length
+            if (ipObj.g.length !== numAttribs + 2) {
+                throw new Error(
+                    `incorrect number of generators. ${ipObj.g.length} generators for ${ipObj.e.length} attributes`
+                )
+            }
+
             const uidp = base64ToUint8Array(ipObj.uidp)
             let descGq
             if (ipObj.descGq.name === L2048N256.OID) {
                 descGq = L2048N256 // or new L2048N256Object()?
             } else if (ipObj.descGq.name === ECP256.OID) {
                 descGq = ECP256 // Or new ECP256Object()
+            } else if (ipObj.descGq.name === Curve25519.OID) {
+                console.log(`loading curve25519`)
+                descGq = Curve25519
             } else {
                 throw new Error(`unknown group: ${ipObj.descGq.name}`)
             }
-            const e = base64ToArray(ipObj.e)
-            const numAttribs = e.length
             const g = descGq.getPreGenGenerators(numAttribs)
             g[0] = descGq.getGq().createElementFromBytes(base64ToUint8Array(ipObj.g[0]))
             const s = base64ToUint8Array(ipObj.s)

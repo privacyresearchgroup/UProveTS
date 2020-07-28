@@ -90,13 +90,6 @@ export class Verifier {
         const verifierSbp = this.Gq.getIdentityElement()
         this.Gq.multiply(hToSrp, szpToMinusScp, verifierSbp)
 
-        // console.log({
-        //     verifierSap: verifierSap.toByteArrayUnsigned(),
-        //     verifierSbp: verifierSbp.toByteArrayUnsigned(),
-        //     szp: szp.toByteArrayUnsigned(),
-        //     scp: scp.toByteArrayUnsigned(),
-        // })
-
         const hash = new Hash()
         hash.updateBytes(h.toByteArrayUnsigned())
         hash.updateBytes(token.pi!)
@@ -105,6 +98,19 @@ export class Verifier {
         hash.updateBytes(verifierSbp.toByteArrayUnsigned())
         const dig = hash.digest()
         const shouldBeScp = this.Zq.createElementFromBytes(dig)
+
+        console.log(`verifierHash inputs`, {
+            sbp: verifierSbp.toByteArrayUnsigned(),
+        })
+        console.log({
+            verifierSap: verifierSap.toByteArrayUnsigned(),
+            verifierSbp: verifierSbp.toByteArrayUnsigned(),
+            szp: szp.toByteArrayUnsigned(),
+            scpb: scp.toByteArrayUnsigned(),
+            shouldBeScpb: shouldBeScp.toByteArrayUnsigned(),
+            scp,
+            shouldBeScp,
+        })
         return scp.equals(shouldBeScp)
     }
 
@@ -139,6 +145,7 @@ export class Verifier {
             md || null
         )
         const attributesValid = this.verifyDisclosedAttributes(proof, token, c, D)
+        console.log({ attributesValid, c: c.toByteArrayUnsigned(), scopeData: { p: scopeData?.p, s: scopeData?.s } })
         if (!attributesValid) {
             console.log(`attributes not valid!`)
             return false
@@ -176,6 +183,7 @@ export class Verifier {
         const xt = computeXt(this.Zq, this.ip, token.ti!)
         const gtPart = this.Gq.getIdentityElement()
 
+        console.log(`verifier g_t`, { gt: this.ip.g[this.ip.t].toByteArrayUnsigned() })
         this.Gq.modexp(this.ip.g[this.ip.t], xt, gtPart)
         this.Gq.multiply(gtPart, this.ip.g[0], gtPart)
 
@@ -189,6 +197,8 @@ export class Verifier {
         hash.updateBytes(aInput.toByteArrayUnsigned())
         const shouldBeA = hash.digest()
 
+        console.log({ proofa: proof.a, shouldBeA })
+
         return cryptoMath.sequenceEqual(proof.a, shouldBeA)
     }
 
@@ -197,6 +207,11 @@ export class Verifier {
             const gs = scopeData.gs
                 ? this.Gq.createElementFromBytes(scopeData.gs)
                 : this.ip.descGq.generateScopeElement(scopeData.s!)
+            console.log(`verifying pseudonym`, {
+                gs: gs.toByteArrayUnsigned(),
+                Ps: proof.Ps.toByteArrayUnsigned(),
+                ap: proof.ap,
+            })
             const bases = [proof.Ps, gs]
             const exponents = [c, proof.r[scopeData.p]]
 
@@ -211,6 +226,7 @@ export class Verifier {
             const hash = new Hash()
             hash.updateBytes(apInput.toByteArrayUnsigned())
             const shouldBeAp = hash.digest()
+            console.log({ apInput: apInput.toByteArrayUnsigned(), shouldBeAp, ap: proof.ap })
 
             return cryptoMath.sequenceEqual(proof.ap, shouldBeAp)
         }
