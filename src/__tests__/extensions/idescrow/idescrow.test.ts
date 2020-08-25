@@ -140,133 +140,113 @@ class FullProtocolUnitTest {
 const protocolTest = new FullProtocolUnitTest(5, params, vectors)
 
 test('run protocol with ID escrow', () => {
-    // Issuer creates the first message
-    const firstMsg = protocolTest.issuerSession.getFirstMessage()
-    expect(firstMsg).toBeDefined()
-    expect(firstMsg.sa.length).toEqual(1)
-    expect(firstMsg.sb.length).toEqual(1)
-
-    expect(firstMsg.sa[0]).toBeDefined()
-    expect(firstMsg.sb[0]).toBeDefined()
-
-    // Prover parses it and creates the second message
-    console.log({ firstMsg })
-    const proverFirstMsg = protocolTest.prover.ip.ParseFirstMessage(firstMsg)
-    const secondMsg = protocolTest.prover.generateSecondMessage(
-        1,
-        protocolTest.attributes,
-        protocolTest.ti,
-        protocolTest.pi,
-        null,
-        proverFirstMsg,
-        true
-    )
-    expect(secondMsg).toBeDefined()
-    expect(secondMsg.sc.length).toEqual(1)
-
-    // Issuer creates third message
-    protocolTest.issuerSession.receiveSecondMessage(secondMsg)
-    const thirdMessage = protocolTest.issuerSession.getThirdMessage()
-
-    expect(thirdMessage).toBeDefined()
-
-    // Prover generates tokens
-    const proverThirdMessage = protocolTest.prover.ip.ParseThirdMessage(thirdMessage)
-    const keyAndBaseToken = protocolTest.prover.generateTokens(proverThirdMessage)
-    // console.log({ keyAndToken: keyAndBaseToken })
-    expect(keyAndBaseToken).toBeDefined()
-    expect(keyAndBaseToken[0]).toBeDefined()
-    expect(keyAndBaseToken[0].key).toBeDefined()
-    expect(keyAndBaseToken[0].token).toBeDefined()
-
-    // Prover generates proof
-
-    const token: SerializedUProveToken = {
-        ...keyAndBaseToken[0].token,
-        uidp: uint8ArrayToBase64(protocolTest.ip.uidp),
-        ti: uint8ArrayToBase64(protocolTest.ti),
-        pi: uint8ArrayToBase64(protocolTest.pi),
-    }
-    const { key } = keyAndBaseToken[0]
-
-    const commit = 3 // commit the email address
-    const disclosed = [2]
-    const committed = [commit]
-    const message = readHexString(vectors.m)
-    const messageD = readHexString(vectors.md)
-    const scopeData: ScopeData = { p: 1, s: Uint8Array.from([90, 11, 117, 103, 103, 108, 97]) }
-    const commitmentPrivateValues: { tildeO: ZqElement[] } = { tildeO: [] }
-    const t1 = performanceTimer.now()
-    const ukat = protocolTest.ip.ParseKeyAndToken({ key, token })
-
-    const proof = protocolTest.prover.generateProof(
-        ukat,
-        disclosed,
-        committed,
-        message,
-        messageD,
-        protocolTest.attributes,
-        scopeData,
-        commitmentPrivateValues
-    )
-    const time = performanceTimer.now() - t1
-    // console.log(`generate proof time: ${time}`)
-
-    expect(proof).toBeDefined()
-    expect(proof.tc).toBeDefined()
-    expect(proof.tc?.length).toEqual(1)
-
-    console.log({ proof })
-
-    const verifier = new Verifier(protocolTest.ip)
-    expect(verifier.verifyTokenSignature(ukat.token)).toBe(true)
-
-    const parsedProof = verifier.parseProof(proof)
-
-    const isValid = verifier.verify(parsedProof, ukat.token, disclosed, committed, message, scopeData, messageD)
-    // console.log(isValid)
-    // console.log(protocolTest.ip.serialize())
-    // console.log(uint8ArrayToBase64(protocolTest.y0.toByteArrayUnsigned()))
-    // console.log(protocolTest.issuerSession.serialize())
-    expect(isValid).toBe(true)
-
-    // test that prover can compute the pseudonym correctly
-    const pseudo = protocolTest.prover.computePseudonym(scopeData, protocolTest.attributes)
-    expect(pseudo).toBe(proof.Ps)
-
-    // perform verifiable encryption
-    const ve = new VerifiableEncrypter(protocolTest.ip, protocolTest.rng)
-
-    // commitmentBytes is the byte array version go the group element C_i
-    const commitmentBytes = parsedProof.tc![0]?.toByteArrayUnsigned()
-    const ieProof = ve.verifiableEncrypt(
-        protocolTest.auditor,
-        ukat.token,
-        Uint8Array.from([32, 32, 32, 32]),
-        commitmentPrivateValues.tildeO[0],
-        commitmentBytes,
-        commit,
-        protocolTest.attributes[commit - 1]
-    )
-    console.log({ ieProof })
-
-    // verify it
-    const vev = new IDEscrowVerifier(protocolTest.ip, protocolTest.auditor)
-    const encryptionValid = vev.verify(ieProof, computeTokenId(ukat.token), parsedProof.tc![0])
-    console.log({ encryptionValid })
-    expect(encryptionValid).toBeTruthy()
-
-    // decrypt it
-    const decrypted = protocolTest.auditor.decrypt(ieProof)
-    const xb = computeX(protocolTest.Zq, protocolTest.attributes[commit - 1], protocolTest.ip.e[commit - 1])
-    const g = protocolTest.ip.descGq.getGenerator()
-    const g2xb = protocolTest.Gq.getIdentityElement()
-    protocolTest.Gq.modexp(g, xb, g2xb)
-    console.log(`verifiably decrypted`, {
-        xb: xb.toByteArrayUnsigned(),
-        Pb: decrypted.toByteArrayUnsigned(),
-        g2xb: g2xb.toByteArrayUnsigned(),
-    })
-
-    expect(cryptoMath.sequenceEqual(decrypted.toByteArrayUnsigned(), g2xb.toByteArrayUnsigned())).toBeTruthy()
+    // // Issuer creates the first message
+    // const firstMsg = protocolTest.issuerSession.getFirstMessage()
+    // expect(firstMsg).toBeDefined()
+    // expect(firstMsg.sa.length).toEqual(1)
+    // expect(firstMsg.sb.length).toEqual(1)
+    // expect(firstMsg.sa[0]).toBeDefined()
+    // expect(firstMsg.sb[0]).toBeDefined()
+    // // Prover parses it and creates the second message
+    // console.log({ firstMsg })
+    // const proverFirstMsg = protocolTest.prover.ip.ParseFirstMessage(firstMsg)
+    // const secondMsg = protocolTest.prover.generateSecondMessage(
+    //     1,
+    //     protocolTest.attributes,
+    //     protocolTest.ti,
+    //     protocolTest.pi,
+    //     null,
+    //     proverFirstMsg,
+    //     true
+    // )
+    // expect(secondMsg).toBeDefined()
+    // expect(secondMsg.sc.length).toEqual(1)
+    // // Issuer creates third message
+    // protocolTest.issuerSession.receiveSecondMessage(secondMsg)
+    // const thirdMessage = protocolTest.issuerSession.getThirdMessage()
+    // expect(thirdMessage).toBeDefined()
+    // // Prover generates tokens
+    // const proverThirdMessage = protocolTest.prover.ip.ParseThirdMessage(thirdMessage)
+    // const keyAndBaseToken = protocolTest.prover.generateTokens(proverThirdMessage)
+    // // console.log({ keyAndToken: keyAndBaseToken })
+    // expect(keyAndBaseToken).toBeDefined()
+    // expect(keyAndBaseToken[0]).toBeDefined()
+    // expect(keyAndBaseToken[0].key).toBeDefined()
+    // expect(keyAndBaseToken[0].token).toBeDefined()
+    // // Prover generates proof
+    // const token: SerializedUProveToken = {
+    //     ...keyAndBaseToken[0].token,
+    //     uidp: uint8ArrayToBase64(protocolTest.ip.uidp),
+    //     ti: uint8ArrayToBase64(protocolTest.ti),
+    //     pi: uint8ArrayToBase64(protocolTest.pi),
+    // }
+    // const { key } = keyAndBaseToken[0]
+    // const commit = 3 // commit the email address
+    // const disclosed = [2]
+    // const committed = [commit]
+    // const message = readHexString(vectors.m)
+    // const messageD = readHexString(vectors.md)
+    // const scopeData: ScopeData = { p: 1, s: Uint8Array.from([90, 11, 117, 103, 103, 108, 97]) }
+    // const commitmentPrivateValues: { tildeO: ZqElement[] } = { tildeO: [] }
+    // const t1 = performanceTimer.now()
+    // const ukat = protocolTest.ip.ParseKeyAndToken({ key, token })
+    // const proof = protocolTest.prover.generateProof(
+    //     ukat,
+    //     disclosed,
+    //     committed,
+    //     message,
+    //     messageD,
+    //     protocolTest.attributes,
+    //     scopeData,
+    //     commitmentPrivateValues
+    // )
+    // const time = performanceTimer.now() - t1
+    // // console.log(`generate proof time: ${time}`)
+    // expect(proof).toBeDefined()
+    // expect(proof.tc).toBeDefined()
+    // expect(proof.tc?.length).toEqual(1)
+    // console.log({ proof })
+    // const verifier = new Verifier(protocolTest.ip)
+    // expect(verifier.verifyTokenSignature(ukat.token)).toBe(true)
+    // const parsedProof = verifier.parseProof(proof)
+    // const isValid = verifier.verify(parsedProof, ukat.token, disclosed, committed, message, scopeData, messageD)
+    // // console.log(isValid)
+    // // console.log(protocolTest.ip.serialize())
+    // // console.log(uint8ArrayToBase64(protocolTest.y0.toByteArrayUnsigned()))
+    // // console.log(protocolTest.issuerSession.serialize())
+    // expect(isValid).toBe(true)
+    // // test that prover can compute the pseudonym correctly
+    // const pseudo = protocolTest.prover.computePseudonym(scopeData, protocolTest.attributes)
+    // expect(pseudo).toBe(proof.Ps)
+    // // perform verifiable encryption
+    // const ve = new VerifiableEncrypter(protocolTest.ip, protocolTest.rng)
+    // // commitmentBytes is the byte array version go the group element C_i
+    // const commitmentBytes = parsedProof.tc![0]?.toByteArrayUnsigned()
+    // const ieProof = ve.verifiableEncrypt(
+    //     protocolTest.auditor,
+    //     ukat.token,
+    //     Uint8Array.from([32, 32, 32, 32]),
+    //     commitmentPrivateValues.tildeO[0],
+    //     commitmentBytes,
+    //     commit,
+    //     protocolTest.attributes[commit - 1]
+    // )
+    // console.log({ ieProof })
+    // // verify it
+    // const vev = new IDEscrowVerifier(protocolTest.ip, protocolTest.auditor)
+    // const encryptionValid = vev.verify(ieProof, computeTokenId(ukat.token), parsedProof.tc![0])
+    // console.log({ encryptionValid })
+    // expect(encryptionValid).toBeTruthy()
+    // // decrypt it
+    // const decrypted = protocolTest.auditor.decrypt(ieProof)
+    // const xb = computeX(protocolTest.Zq, protocolTest.attributes[commit - 1], protocolTest.ip.e[commit - 1])
+    // const g = protocolTest.ip.descGq.getGenerator()
+    // const g2xb = protocolTest.Gq.getIdentityElement()
+    // protocolTest.Gq.modexp(g, xb, g2xb)
+    // console.log(`verifiably decrypted`, {
+    //     xb: xb.toByteArrayUnsigned(),
+    //     Pb: decrypted.toByteArrayUnsigned(),
+    //     g2xb: g2xb.toByteArrayUnsigned(),
+    // })
+    // expect(cryptoMath.sequenceEqual(decrypted.toByteArrayUnsigned(), g2xb.toByteArrayUnsigned())).toBeTruthy()
 })
