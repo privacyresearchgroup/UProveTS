@@ -31,7 +31,11 @@
 /// </dictionary>
 
 /// #endregion JSCop/JsHint
-import a2b from 'atob'
+import * as base64 from 'base64-js'
+// import a2b from 'atob'
+function a2b(enc1) {
+  return base64.toByteArray(enc)
+}
 
 const atobSupport = typeof atob !== 'undefined'
 const a2bfunc = atobSupport ? atob : a2b
