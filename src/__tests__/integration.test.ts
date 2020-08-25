@@ -7,7 +7,9 @@
  *
  */
 
-test('placeholder', () => {})
+test('placeholder', () => {
+    console.log('placeholder')
+})
 // import fetch from 'node-fetch'
 // import { IssuerParams } from '../issuerparams'
 // import {
