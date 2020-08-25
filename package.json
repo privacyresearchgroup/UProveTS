@@ -1,5 +1,5 @@
 {
-  "name": "@rolfe/uprovets",
+  "name": "@privacyresearch/uprovets",
   "version": "1.0.32",
   "description": "TypeScript library for the UProve anonymous credential system",
   "main": "lib/index.js",
