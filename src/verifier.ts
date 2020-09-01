@@ -43,23 +43,33 @@ export class Verifier {
     }
 
     parseProof(proof: SerializedProof): Proof {
+        return Verifier._parseProof(proof, this.Gq, this.Zq)
+    }
+
+    static _parseProof(proof: SerializedProof, Gq: MultiplicativeGroup, Zq: ZqField): Proof {
         const D = proof.D.map(base64ToArray)
         const a = base64ToUint8Array(proof.a)
-        const r = proof.r.map((b64: string) => this.Zq.createElementFromBytes(base64ToUint8Array(b64)))
+        const r = proof.r.map((b64: string) => Zq.createElementFromBytes(base64ToUint8Array(b64)))
 
         const ap = proof.ap ? base64ToUint8Array(proof.ap) : undefined
-        const Ps = proof.Ps ? this.Gq.createElementFromBytes(base64ToUint8Array(proof.Ps)) : undefined
+        const Ps = proof.Ps ? Gq.createElementFromBytes(base64ToUint8Array(proof.Ps)) : undefined
 
         let tc: GroupElement[] | undefined
         let ta: Uint8Array[] | undefined
         let tr: ZqElement[] | undefined
         if (proof.tc) {
-            tc = proof.tc.map((b64: string) => this.Gq.createElementFromBytes(base64ToUint8Array(b64)))
+            tc = proof.tc.map((b64: string) => Gq.createElementFromBytes(base64ToUint8Array(b64)))
             ta = proof.ta?.map((b64: string) => base64ToUint8Array(b64))
-            tr = proof.tr?.map((b64: string) => this.Zq.createElementFromBytes(base64ToUint8Array(b64)))
+            tr = proof.tr?.map((b64: string) => Zq.createElementFromBytes(base64ToUint8Array(b64)))
         }
 
         return { D, a, r, ap, Ps, tc, ta, tr }
+    }
+
+    static parseProof(proof: SerializedProof, ip: IssuerParamsData): Proof {
+        const Gq = ip.descGq.getGq()
+        const Zq = ip.descGq.getZq()
+        return Verifier._parseProof(proof, Gq, Zq)
     }
 
     verifyTokenSignature(token: UProveToken): boolean {
