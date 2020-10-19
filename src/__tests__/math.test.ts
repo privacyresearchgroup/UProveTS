@@ -1,4 +1,4 @@
-import { simpleCurve25519 } from '@rolfe/pr-math'
+import { simpleCurve25519 } from '@privacyresearch/pr-math'
 import { ECGroupElement, ZqElement, ScopeData } from '..'
 import cryptoMath from '../msrcrypto/cryptoMath'
 import ECP256 from '../EcP256'
