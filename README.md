@@ -42,7 +42,7 @@ This project is meant to allow developers to quickly prototype applications usin
 To install with yarn, simply run
 
 ```
-yarn install @rolfe/uprovets
+yarn add @privacyresearch/uprovets
 ```
 
 For detailed example usage, look at [`__tests__/full-protocol.ts`](https://github.com/privacyresearchgroup/UProveTS/blob/master/src/__tests__/full-protocol.test.ts) and[`__tests__/integration-test.ts`](https://github.com/privacyresearchgroup/UProveTS/blob/master/src/__tests__/integration.test.ts). To execute and run the integration tests you will need to deploy an issuing server. A sample issuer is available [here](https://github.com/privacyresearchgroup/uproveissuer).
