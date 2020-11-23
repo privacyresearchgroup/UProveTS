@@ -33,8 +33,8 @@
 /// #endregion JSCop/JsHint
 import * as base64 from 'base64-js'
 // import a2b from 'atob'
-function a2b(enc1) {
-  return base64.toByteArray(enc)
+function a2b(enc) {
+  return String.fromCharCode(...base64.toByteArray(enc))
 }
 
 const atobSupport = typeof atob !== 'undefined'
