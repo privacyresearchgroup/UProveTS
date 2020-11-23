@@ -1,6 +1,6 @@
 {
   "name": "@privacyresearch/uprovets",
-  "version": "1.0.35",
+  "version": "1.0.36",
   "description": "TypeScript library for the UProve anonymous credential system",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
