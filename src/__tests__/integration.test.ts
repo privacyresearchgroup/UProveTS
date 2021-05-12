@@ -53,7 +53,7 @@ async function getParamsFromAPI(): Promise<IssuerParams> {
         headers: { 'x-api-key': apikey },
     })
     const sip = await result.json()
-    console.log(sip)
+    // console.log(sip)
     return IssuerParams.ParseIssuerParams(sip)
 }
 
@@ -64,7 +64,7 @@ async function startSession(): Promise<StartSessionResponse> {
         body: JSON.stringify(initialData),
     })
     const rsp = await result.json()
-    console.log(rsp)
+    // console.log(rsp)
     return rsp
 }
 
@@ -75,7 +75,7 @@ async function completeSession(id: string, secondMessage: SerializedSecondMessag
         body: JSON.stringify({ secondMessage }),
     })
     const rsp = await result.json()
-    console.log(rsp)
+    // console.log(rsp)
     return rsp.thirdMessage
 }
 
@@ -106,7 +106,7 @@ test('test full proof', async () => {
     )
     const serializedThirdMessage = await completeSession(id, secondMessage)
     const thirdMessage = ip.ParseThirdMessage(serializedThirdMessage)
-    console.log(serializedThirdMessage)
+    // console.log(serializedThirdMessage)
     expect(thirdMessage).toBeDefined()
 
     // Prover generates tokens
@@ -222,7 +222,7 @@ test('cannot disclose pseudonym attribute', async () => {
     )
     const serializedThirdMessage = await completeSession(id, secondMessage)
     const thirdMessage = ip.ParseThirdMessage(serializedThirdMessage)
-    console.log(serializedThirdMessage)
+    // console.log(serializedThirdMessage)
     expect(thirdMessage).toBeDefined()
 
     // Prover generates tokens
@@ -326,7 +326,7 @@ test('test full proof with commitments', async () => {
     )
     const serializedThirdMessage = await completeSession(id, secondMessage)
     const thirdMessage = ip.ParseThirdMessage(serializedThirdMessage)
-    console.log(serializedThirdMessage)
+    // console.log(serializedThirdMessage)
     expect(thirdMessage).toBeDefined()
 
     // Prover generates tokens
@@ -419,7 +419,7 @@ test('test full proof with commitments', async () => {
             commitmentPrivateValues
         )
     }).toThrow()
-    console.log({ commitmentPrivateValues })
+    // console.log({ commitmentPrivateValues })
     expect(Object.keys(commitmentPrivateValues).length).toBe(1)
 
     expect(proof).toBeDefined()

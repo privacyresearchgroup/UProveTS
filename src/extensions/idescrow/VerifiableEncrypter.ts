@@ -78,17 +78,17 @@ export class VerifiableEncrypter {
             additionalInfo
         )
 
-        console.log(`prover escrow challenge`, {
-            UIDt: computeTokenId(token),
-            H: escrowPublicKey.H.toByteArrayUnsigned(),
-            Cb: commitmentBytes,
-            E1: E1.toByteArrayUnsigned(),
-            E2: E2.toByteArrayUnsigned(),
-            CbPrime: CbPrime.toByteArrayUnsigned(),
-            E1Prime: E1Prime.toByteArrayUnsigned(),
-            E2Prime: E2Prime.toByteArrayUnsigned(),
-            c: c.toByteArrayUnsigned(),
-        })
+        // console.log(`prover escrow challenge`, {
+        //     UIDt: computeTokenId(token),
+        //     H: escrowPublicKey.H.toByteArrayUnsigned(),
+        //     Cb: commitmentBytes,
+        //     E1: E1.toByteArrayUnsigned(),
+        //     E2: E2.toByteArrayUnsigned(),
+        //     CbPrime: CbPrime.toByteArrayUnsigned(),
+        //     E1Prime: E1Prime.toByteArrayUnsigned(),
+        //     E2Prime: E2Prime.toByteArrayUnsigned(),
+        //     c: c.toByteArrayUnsigned(),
+        // })
         const cNegate = this._Zq.createElementFromInteger(0)
         this._Zq.subtract(this._Zq.createElementFromInteger(0), c, cNegate)
 

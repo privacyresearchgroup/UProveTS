@@ -8,7 +8,7 @@ const chatty = false
 test('generate scope elt', () => {
     const scopeData: ScopeData = { p: 1, s: Uint8Array.from([90, 11, 117, 103, 103, 108, 97]) }
     const gs = ECP256.generateScopeElement(scopeData.s!)
-    console.log(gs.toByteArrayUnsigned())
+    // console.log(gs.toByteArrayUnsigned())
 })
 test('math check', () => {
     const group = ECP256
@@ -139,7 +139,7 @@ test('math check', () => {
     )
 
     const untyped = gs as any
-    console.log(`is valid curve point: ${untyped.validate()}`)
+    // console.log(`is valid curve point: ${untyped.validate()}`)
 
     const p256 = cryptoECC.createP256()
     const g = ECP256.getGenerator()
@@ -147,7 +147,7 @@ test('math check', () => {
     moddigits[0] = moddigits[0] - 1
     const modminusone = Zq.createElementFromDigits(moddigits)
     if (chatty) {
-        console.log({ modminusone: modminusone.m_digits, mod: Zq.m_modulus, gqorder: p256.order, p256 })
+        // console.log({ modminusone: modminusone.m_digits, mod: Zq.m_modulus, gqorder: p256.order, p256 })
     }
     const gs2modminusone = Gq.getIdentityElement()
     Gq.modexp(gs, modminusone, gs2modminusone)
@@ -181,20 +181,20 @@ test('math check', () => {
     Gq.modexp(gs2c, xp, gs2c2xp)
 
     if (chatty) {
-        console.log('MATH TEST', {
-            // Ps2cXgs2cxp: Ps2cXgs2cxp.toByteArrayUnsigned(),
-            gs: pointRep(gs as ECGroupElement),
-            Ps: pointRep(Ps as ECGroupElement),
-            xp: modPointRep(xp),
-            c: modPointRep(c),
-            cxp: modPointRep(cxp),
-            gs2modulus: pointRep(gs2modulus as ECGroupElement),
-            Ps2cxp: pointRep(Ps2cxp as ECGroupElement),
-            gs2cxp: pointRep(gs2cxp as ECGroupElement),
-            Ps2c: pointRep(Ps2c as ECGroupElement),
-            gs2c2xp: pointRep(gs2c2xp as ECGroupElement),
-            modulus: cxp.m_group.m_modulus,
-        })
+        // console.log('MATH TEST', {
+        // Ps2cXgs2cxp: Ps2cXgs2cxp.toByteArrayUnsigned(),
+        //     gs: pointRep(gs as ECGroupElement),
+        //     Ps: pointRep(Ps as ECGroupElement),
+        //     xp: modPointRep(xp),
+        //     c: modPointRep(c),
+        //     cxp: modPointRep(cxp),
+        //     gs2modulus: pointRep(gs2modulus as ECGroupElement),
+        //     Ps2cxp: pointRep(Ps2cxp as ECGroupElement),
+        //     gs2cxp: pointRep(gs2cxp as ECGroupElement),
+        //     Ps2c: pointRep(Ps2c as ECGroupElement),
+        //     gs2c2xp: pointRep(gs2c2xp as ECGroupElement),
+        //     modulus: cxp.m_group.m_modulus,
+        // })
     }
     expect(cryptoMath.sequenceEqual(Ps2c.toByteArrayUnsigned(), gs2cxp.toByteArrayUnsigned())).toBeTruthy()
 })
@@ -231,7 +231,7 @@ test(`curve25519 test`, () => {
     const g = curve.generator.clone()
     const q = curve.generator.clone()
     curve.scalarMultiply(ordMinusOne, g, q)
-    console.log({ ord: ord.digits, gx: g.x.digits, qx: q.x.digits, gy: g.y.digits, qy: q.y.digits })
+    // console.log({ ord: ord.digits, gx: g.x.digits, qx: q.x.digits, gy: g.y.digits, qy: q.y.digits })
     expect(cryptoMath.sequenceEqual(g.x.digits, q.x.digits)).toBeTruthy()
     expect(cryptoMath.sequenceEqual(g.y.digits, q.y.digits)).toBeFalsy()
 })

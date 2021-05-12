@@ -148,7 +148,7 @@ test('run protocol with ID escrow', () => {
     expect(firstMsg.sa[0]).toBeDefined()
     expect(firstMsg.sb[0]).toBeDefined()
     // Prover parses it and creates the second message
-    console.log({ firstMsg })
+    // console.log({ firstMsg })
     const proverFirstMsg = protocolTest.prover.ip.ParseFirstMessage(firstMsg)
     const secondMsg = protocolTest.prover.generateSecondMessage(
         1,
@@ -205,7 +205,7 @@ test('run protocol with ID escrow', () => {
     expect(proof).toBeDefined()
     expect(proof.tc).toBeDefined()
     expect(proof.tc?.length).toEqual(1)
-    console.log({ proof })
+    // console.log({ proof })
     const verifier = new Verifier(protocolTest.ip)
     expect(verifier.verifyTokenSignature(ukat.token)).toBe(true)
     const parsedProof = verifier.parseProof(proof)
@@ -231,11 +231,11 @@ test('run protocol with ID escrow', () => {
         commit,
         protocolTest.attributes[commit - 1]
     )
-    console.log({ ieProof })
+    // console.log({ ieProof })
     // verify it
     const vev = new IDEscrowVerifier(protocolTest.ip, protocolTest.auditor)
     const encryptionValid = vev.verify(ieProof, computeTokenId(ukat.token), parsedProof.tc![0])
-    console.log({ encryptionValid })
+    // console.log({ encryptionValid })
     expect(encryptionValid).toBeTruthy()
     // decrypt it
     const decrypted = protocolTest.auditor.decrypt(ieProof)
@@ -243,10 +243,10 @@ test('run protocol with ID escrow', () => {
     const g = protocolTest.ip.descGq.getGenerator()
     const g2xb = protocolTest.Gq.getIdentityElement()
     protocolTest.Gq.modexp(g, xb, g2xb)
-    console.log(`verifiably decrypted`, {
-        xb: xb.toByteArrayUnsigned(),
-        Pb: decrypted.toByteArrayUnsigned(),
-        g2xb: g2xb.toByteArrayUnsigned(),
-    })
+    // console.log(`verifiably decrypted`, {
+    //     xb: xb.toByteArrayUnsigned(),
+    //     Pb: decrypted.toByteArrayUnsigned(),
+    //     g2xb: g2xb.toByteArrayUnsigned(),
+    // })
     expect(cryptoMath.sequenceEqual(decrypted.toByteArrayUnsigned(), g2xb.toByteArrayUnsigned())).toBeTruthy()
 })

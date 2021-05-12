@@ -23,12 +23,12 @@ test('to and from JSON', () => {
     expect(as.attributes[0].name).toBe('aBool')
 
     const encoded = as.encode()
-    console.log(encoded)
+    // console.log(encoded)
     expect(encoded[0]).toEqual([AttributeType.Boolean, 5, 97, 66, 111, 111, 108, 0])
 
     const as2 = AttributeSet.decode(encoded)
     const json2 = as2.json
-    console.log(json2)
+    // console.log(json2)
     expect(json2).toEqual(testjson)
 
     expect(as.indexOfAttribute('motto')).toBe(2)
@@ -40,5 +40,5 @@ test(`encode/decode large strings`, () => {
     const prefix = [0, 1, 88, 20000]
     const bigAttr = [...prefix, ...bigArray]
     const strattr = StringAttribute.decode(bigAttr)
-    console.log({ strattr: { name: strattr.name, val: strattr.value.slice(0, 20), len: strattr.value.length } })
+    // console.log({ strattr: { name: strattr.name, val: strattr.value.slice(0, 20), len: strattr.value.length } })
 })

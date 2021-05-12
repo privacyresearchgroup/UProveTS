@@ -366,7 +366,7 @@ export class Prover implements ProverData, ProverFunctions {
             if (scopeData.gs) {
                 gs = this.Gq.createElementFromBytes(scopeData.gs)
             } else {
-                console.log(`generating scope element`, { scopeData })
+                // console.log(`generating scope element`, { scopeData })
                 gs = this.ip.descGq.generateScopeElement(scopeData.s!)
             }
             const apInput = this.Gq.getIdentityElement()
@@ -466,7 +466,7 @@ export class Prover implements ProverData, ProverFunctions {
         if (scopeData.gs) {
             gs = this.Gq.createElementFromBytes(scopeData.gs)
         } else {
-            console.log(`generating scope element`, { scopeData })
+            // console.log(`generating scope element`, { scopeData })
             gs = this.ip.descGq.generateScopeElement(scopeData.s!)
         }
         const Ps = this.Gq.getIdentityElement()

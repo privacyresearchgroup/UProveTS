@@ -152,7 +152,7 @@ test('test second message', () => {
     const time = performanceTimer.now() - t1
     totalTime += time
 
-    console.log(`Generate second message time: ${time}`)
+    // console.log(`Generate second message time: ${time}`)
     expect(
         proverTest.verifyComputation(
             Zq,
@@ -171,7 +171,7 @@ test('generate token', () => {
     const t1 = performanceTimer.now()
     proverTest.keyAndToken = prover.generateTokens(thirdMsg)
     const time = performanceTimer.now() - t1
-    console.log(`generate token time: ${time}`)
+    // console.log(`generate token time: ${time}`)
     totalTime += time
     const token = proverTest.keyAndToken[0].token
     expect(
@@ -243,7 +243,7 @@ test('generate proof', () => {
     const time = performanceTimer.now() - t1
     const dSize = disclosed.length
 
-    console.log(`generateProof time: ${time}`)
+    // console.log(`generateProof time: ${time}`)
     expect(proverTest.verifyArrayComputation(base64ToUint8Array(proof!.a), 'a')).toBeTruthy()
     if (!testLiteMode) {
         expect(proverTest.verifyArrayComputation(base64ToUint8Array(proof!.ap), 'ap')).toBeTruthy()
